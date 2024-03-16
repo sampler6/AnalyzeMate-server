@@ -1,0 +1,64 @@
+[tool.poetry]
+name = "src"
+version = "0.1.0"
+description = ""
+authors = ["Nikita Korzhuk <ssamplerr6@gmail.com>", "Veronika Rekalo <veronika.rekalo16@gmail.com>", ]
+license = "GPL"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+alembic = "^1.13.1"
+asyncpg = "^0.29.0"
+uvicorn = "^0.28.0"
+pydantic = "^2.6.4"
+fastapi = "^0.110.0"
+
+[tool.poetry.dev-dependencies]
+mypy = "^1.9.0"
+ruff = "^0.3.3"
+pre-commit = "^3.6.2"
+pytest = "^8.1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.ruff]
+line-length = 120
+include = ["*.py"]
+exclude = ["alembic"]
+
+[tool.ruff.lint]
+extend-select = [
+    "E", # pycodestyle
+    "I", # isort
+    "B", # flake8-bugbear
+    "G", # flake8-logging-format
+    "SIM", # flake8-simplify
+    "ASYNC", # flake8-async
+    "UP", # pyupgrade
+]
+
+[tool.ruff.lint.isort]
+known-third-party = ["alembic"]
+known-first-party = ["common", "core", "settings"]
+split-on-trailing-comma = true
+combine-as-imports = true
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.params.Depends",
+    "fastapi.Query",
+    "fastapi.params.Query",
+    "fastapi.Security"
+]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+ignore_missing_imports = "True"
+disallow_untyped_defs = "True"
+exclude = ["alembic"]
