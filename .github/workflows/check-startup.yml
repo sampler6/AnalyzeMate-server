@@ -6,4 +6,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - run: docker-compose -f docker-compose.test.yml up --build
+    - run: docker-compose --env-file test.env -f docker-compose.test.yml up --build
