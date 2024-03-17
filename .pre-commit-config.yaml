@@ -11,15 +11,15 @@ repos:
     rev: v0.2.1
     hooks:
       - id: ruff-format
-        exclude: ^alembic/, ^versions/
+        exclude: ^alembic/$
       - id: ruff
-        exclude: ^alembic/, ^versions/
+        exclude: ^alembic/$
         args: [ --fix ]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.8.0
     hooks:
       - id: mypy
-        exclude: ^alembic/, ^versions/
+        exclude: ^alembic/$
         additional_dependencies:
           - "pydantic"
