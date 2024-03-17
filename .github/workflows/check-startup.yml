@@ -1,0 +1,9 @@
+name: StartupCheck
+on: [pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - run: docker-compose -f docker-compose.test.yml up --build
