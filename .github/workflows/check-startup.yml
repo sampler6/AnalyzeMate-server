@@ -1,4 +1,4 @@
-name: StartupCheck
+yname: StartupCheck
 on: [pull_request]
 
 jobs:
@@ -13,5 +13,5 @@ jobs:
     - run: pip install poetry
     - run: pip install pre-commit
     - run: poetry install
-    - run: pytest -rfs -vv --color yes
+    - run: poetry run pytest -rfs -vv --color yes
     
