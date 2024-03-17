@@ -1,4 +1,4 @@
-yname: StartupCheck
+name: StartupCheck
 on: [pull_request]
 
 jobs:
