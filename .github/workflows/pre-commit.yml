@@ -10,6 +10,6 @@ jobs:
       with:
         python-version: "3.12.2"
     - run: pip install --upgrade pip
-    - run: pip install ruff mypy
-    - run: ruff check .
-    - run: mypy . --exclude alembic
+    - run: pip install poetry
+    - run: poetry install
+    - run: pre-commit run
