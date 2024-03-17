@@ -1,3 +1,4 @@
+exclude: ^alembic/
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
@@ -11,15 +12,12 @@ repos:
     rev: v0.2.1
     hooks:
       - id: ruff-format
-        exclude: ^alembic/$
       - id: ruff
-        exclude: ^alembic/$
         args: [ --fix ]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.8.0
     hooks:
       - id: mypy
-        exclude: ^alembic/$
         additional_dependencies:
           - "pydantic"
