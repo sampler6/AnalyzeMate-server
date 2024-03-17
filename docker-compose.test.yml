@@ -1,7 +1,7 @@
 services:
   pytest-analyzemate:
     env_file:
-      - .env
+      - .env-non-dev
     build:
       context: .
       dockerfile: Dockerfile
