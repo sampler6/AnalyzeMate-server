@@ -1,8 +1,8 @@
-name: Code Quality
+name: Pre-commit
 on: [pull_request]
 
 jobs:
-  build:
+  Code-Quality:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -15,3 +15,17 @@ jobs:
     - run: poetry install
     - run: pre-commit install
     - run: pre-commit run --all-files
+
+  Startup-Check:
+    runs-on: ubuntu-latest 
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.12.2"
+    - run: pip install --upgrade pip
+    - run: pip install poetry
+    - run: pip install pre-commit
+    - run: poetry install
+    - run: pre-commit install
+    - run: poetry run pytest -rfs -vv --color yes
