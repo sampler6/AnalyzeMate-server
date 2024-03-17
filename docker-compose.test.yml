@@ -1,0 +1,10 @@
+services:
+  pytest-analyzemate:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        INSTALL_DEV: "true"
+    command: bash -c "pytest -rfs -vv --color yes"
