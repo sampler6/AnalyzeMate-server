@@ -5,6 +5,20 @@
 
 # Локальный запуск
 
+## Необходимо предварительно установить
+
+- Создать виртуальное окружение для проекта, если необходимо
+- `python 3.12`
+- `pip install poetry`
+- `pip install pre-commit`
+- `poetry install`
+- `pre-commit install`
+- Скопировать .env-non-dev в .env. Если необходимо, заполнить незаполненные параметры
+
+## Настройки проекта
+1. Директорию src пометить как `Sources Root`(Контекстное меню - `Mark Directory as` - `Sources Root`)
+
+
 ## Запуск в контейнере
 1. Запускаем docker-compose:
 ```bash
@@ -23,16 +37,3 @@ docker-compose -f docker-compose.test.yml up --build
 В проекте используется pre-commit. Каждый коммит проходит проверку линтерами.
 Линтеры запускаются автоматически при коммите. Если хотите запустить их сами:
 - `pre-commit run --all-files`
-
-## Необходимо предварительно установить
-
-- Создать виртуальное окружение для проекта, если необходимо
-- `python 3.12`
-- `pip install poetry`
-- `pip install pre-commit`
-- `poetry install`
-- `pre-commit install`
-
-## Настройки проекта
-1. Директорию src пометить как `Sources Root`(Контекстное меню - `Mark Directory as` - `Sources Root`)
-
