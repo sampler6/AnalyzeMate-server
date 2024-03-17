@@ -5,5 +5,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - run: docker-compose -f docker-compose.test.yml up --build
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.12.2"
+    - run: pip install --upgrade pip
+    - run: pip install poetry
+    - run: pip install pre-commit
+    - run: poetry install
+    - run: poetry run pytest -rfs -vv --color yes
+    
