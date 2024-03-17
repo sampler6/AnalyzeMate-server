@@ -14,4 +14,13 @@ jobs:
     - run: pip install pre-commit
     - run: poetry install
     - run: pre-commit install
+
+  Code-Quality:
+    runs-on: ubuntu-latest
+    steps:
     - run: pre-commit run --all-files
+
+  Startup-Check:
+    runs-on: ubuntu-latest 
+    steps:
+    - run: poetry run pytest -rfs -vv --color yes
