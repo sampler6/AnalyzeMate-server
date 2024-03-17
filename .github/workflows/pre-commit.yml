@@ -11,5 +11,7 @@ jobs:
         python-version: "3.12.2"
     - run: pip install --upgrade pip
     - run: pip install poetry
+    - run: pip install pre-commit
     - run: poetry install
-    - run: pre-commit run
+    - run: pre-commit install
+    - run: pre-commit run --all-files
