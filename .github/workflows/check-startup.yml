@@ -7,3 +7,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - run: docker-compose -f docker-compose.test.yml up --build
+    - run: coverage report -m
