@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "src"
 version = "0.1.0"
-description = ""
+description = "a"
 authors = ["Nikita Korzhuk <ssamplerr6@gmail.com>", "Veronika Rekalo <veronika.rekalo16@gmail.com>", ]
 license = "GPL"
 readme = "README.md"
