@@ -1,8 +1,8 @@
-"""add securities
+"""add securities and price_history
 
-Revision ID: 5a5a5ba368ec
+Revision ID: d91f0be6c971
 Revises: e58c17cd534a
-Create Date: 2024-03-21 21:38:22.097730
+Create Date: 2024-03-21 22:02:13.556135
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '5a5a5ba368ec'
+revision: str = 'd91f0be6c971'
 down_revision: Union[str, None] = 'e58c17cd534a'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -27,13 +27,14 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('securities',
+    sa.Column('uid', sa.String(), nullable=False),
     sa.Column('figi', sa.String(), nullable=False),
     sa.Column('ticker', sa.String(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('price_history', sa.Integer(), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['price_history'], ['price_history.id'], ),
-    sa.PrimaryKeyConstraint('figi')
+    sa.PrimaryKeyConstraint('uid')
     )
     # ### end Alembic commands ###
 
