@@ -1,8 +1,11 @@
 from fastapi import APIRouter
 
+from api.api_v1.user import router as user_router
 from api.schemas.base import BaseResponse
 
 router = APIRouter()
+
+router.include_router(user_router, prefix="/users")
 
 
 @router.get("/check_startup/")

@@ -11,3 +11,6 @@ DB_USER = os.environ.get("DB_USER")
 DB_PASS = os.environ.get("DB_PASS")
 SECRET = os.environ.get("SECRET")
 TOKEN = os.environ.get("TOKEN")
+
+if not SECRET:
+    raise Exception("SECRET is not defined")
