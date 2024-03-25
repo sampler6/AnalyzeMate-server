@@ -1,14 +1,15 @@
+import asyncio
 from datetime import datetime, timedelta
 from typing import Optional
 
 import matplotlib.pyplot as plt
-import Servises
+from servises import Services
 from tinkoff.invest import CandleInterval
 
 
 class Graphic:
     @staticmethod
-    def PrintGraphic(stock_data: dict, indicators: Optional[dict] = None) -> None:
+    def print_graphic(stock_data: dict, indicators: Optional[dict] = None) -> None:
         """
         Отображает график ценовых данных и индикаторов.
         :param stock_data: dict
@@ -98,16 +99,17 @@ class Graphic:
         plt.show()
 
 
-pass
-
-
 if __name__ == "__main__":
-    shares = Servises.Services.GetHistoricCandle(
-        Ticker="SBER",
-        From=datetime.utcnow() - timedelta(days=400),
-        To=datetime.utcnow(),
-        Interval=CandleInterval.CANDLE_INTERVAL_DAY,
-        IntegerRepresentationTime=False,
+    service = Services()
+
+    shares = asyncio.run(
+        service.get_historic_candle(
+            ticker="SBER",
+            from_date=datetime.utcnow() - timedelta(days=400),
+            to_date=datetime.utcnow(),
+            interval=CandleInterval.CANDLE_INTERVAL_DAY,
+            integer_representation_time=False,
+        )
     )
 
     m = [["time", "value"]]
@@ -123,4 +125,4 @@ if __name__ == "__main__":
         }
     }
 
-    Graphic.PrintGraphic(shares, indicator)
+    Graphic.print_graphic(shares, indicator)

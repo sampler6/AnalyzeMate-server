@@ -1,14 +1,15 @@
+import asyncio
 from datetime import datetime, timedelta
 
-import Graphic
-import Servises
+import graphic
+from servises import Services
 from tinkoff.invest import CandleInterval
 
 
 class Indicators:
     # В процессе написания! Можно не смотреть
     @staticmethod
-    def CalculateRSI(data, window):  # type: ignore
+    def calculate_rsi(data, window):  # type: ignore
         history = data["history"][1:]  # пропускаем строку заголовков
         time = [entry[0] for entry in history]
         close_prices = [entry[2] for entry in history]
@@ -38,15 +39,18 @@ class Indicators:
 
 
 if __name__ == "__main__":
-    shares = Servises.Services.GetHistoricCandle(
-        Ticker="SBER",
-        From=datetime.utcnow() - timedelta(days=400),
-        To=datetime.utcnow(),
-        Interval=CandleInterval.CANDLE_INTERVAL_DAY,
-        IntegerRepresentationTime=False,
+    service = Services()
+    shares = asyncio.run(
+        service.get_historic_candle(
+            ticker="SBER",
+            from_date=datetime.utcnow() - timedelta(days=400),
+            to_date=datetime.utcnow(),
+            interval=CandleInterval.CANDLE_INTERVAL_DAY,
+            integer_representation_time=False,
+        )
     )
 
-    a = Indicators.CalculateRSI(shares, 10)
+    a = Indicators.calculate_rsi(shares, 10)
     indicator = {
         "black": {
             "history": a,
@@ -54,5 +58,5 @@ if __name__ == "__main__":
         }
     }
 
-    Graphic.Graphic.PrintGraphic(shares, indicator)
+    graphic.Graphic.print_graphic(shares, indicator)
     print(a)
