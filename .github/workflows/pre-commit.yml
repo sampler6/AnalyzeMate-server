@@ -28,4 +28,5 @@ jobs:
     - run: pip install pre-commit
     - run: poetry install
     - run: pre-commit install
+    - run: mv ./.env-non-dev ./.env
     - run: poetry run pytest -rfs -vv --color yes

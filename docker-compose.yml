@@ -2,6 +2,7 @@ services:
   db:
     image: postgres:16.1
     container_name: db
+    restart: always
     env_file:
       - .env
     user: postgres
@@ -15,6 +16,18 @@ services:
     networks:
       Analyzemate-network:
 
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - /path/to/local/dаta:/root/redis
+      - /path/to/local/redis.conf:/usr/local/etc/redis/redis.conf
+    env_file:
+      - .env
+    networks:
+      Analyzemate-network:
 
   app:
     build:
@@ -26,6 +39,7 @@ services:
       - 8000:8000
     depends_on:
       - db
+      - redis
     command: bash -c "while !</dev/tcp/db/5432; do sleep 1; done; alembic upgrade head & gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000"
     networks:
       Analyzemate-network:
