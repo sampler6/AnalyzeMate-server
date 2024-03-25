@@ -5,7 +5,7 @@ from api.schemas.base import BaseResponse
 
 router = APIRouter()
 
-router.include_router(user_router, prefix="/users")
+router.include_router(user_router)
 
 
 @router.get("/check_startup/")

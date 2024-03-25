@@ -11,6 +11,8 @@ DB_USER = os.environ.get("DB_USER")
 DB_PASS = os.environ.get("DB_PASS")
 SECRET = os.environ.get("SECRET")
 TOKEN = os.environ.get("TOKEN")
+REDIS_HOST = os.environ.get("REDIS_HOST")
+REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD")
 
 if not SECRET:
     raise Exception("SECRET is not defined")
