@@ -1,11 +1,14 @@
-import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
-from tinkoff.invest import CandleInterval
+from typing import Optional
+
+import matplotlib.pyplot as plt
 import Servises
+from tinkoff.invest import CandleInterval
+
 
 class Graphic:
     @staticmethod
-    def PrintGraphic(stock_data, indicators=None):
+    def PrintGraphic(stock_data: dict, indicators: Optional[dict] = None) -> None:
         """
         Отображает график ценовых данных и индикаторов.
         :param stock_data: dict
@@ -15,7 +18,7 @@ class Graphic:
             пару "цвет: данные", где данные включают историю индикатора и прозрачность линии.
         """
         # Извлечение необходимых данных
-        history = stock_data['history'][1:]  # пропускаем строку заголовков
+        history = stock_data["history"][1:]  # пропускаем строку заголовков
         time = [entry[0] for entry in history]
         open_prices = [entry[1] for entry in history]
         close_prices = [entry[2] for entry in history]
@@ -27,8 +30,8 @@ class Graphic:
         fig, ax1 = plt.subplots()
 
         # Определение ширины элементов свечи
-        width = .6
-        width2 = .05
+        width = 0.6
+        width2 = 0.05
 
         # Отображение свечей для положительных и отрицательных дней
         for i in range(len(time)):
@@ -47,19 +50,20 @@ class Graphic:
 
         if indicators:
             for color, data in indicators.items():
-                history = data['history'][1:]  # пропускаем строку заголовков
+                history = data["history"][1:]  # пропускаем строку заголовков
                 time = [entry[0] for entry in history]
                 values = [entry[1] for entry in history]
-                alpha = data.get('alpha', 1.0)  # Значение прозрачности по умолчанию - 1.0 (полностью непрозрачный)
-                plt.plot(time, values, color=color, alpha=alpha,
-                         label=color)  # Построение линии с соответствующим цветом и прозрачностью
+                alpha = data.get("alpha", 1.0)  # Значение прозрачности по умолчанию - 1.0 (полностью непрозрачный)
+                plt.plot(
+                    time, values, color=color, alpha=alpha, label=color
+                )  # Построение линии с соответствующим цветом и прозрачностью
 
         # Отображение объема
         ax2 = ax1.twinx()
 
         maxClm = max(volume)
         for i in range(len(volume)):
-            if (i == 0):
+            if i == 0:
                 volume[i] = volume[i] / maxClm * 10
             else:
                 volume[i] = volume[i] / maxClm
@@ -73,13 +77,12 @@ class Graphic:
                 volume_colors.append("green")
             else:
                 volume_colors.append("black")
-        ax2.bar(time, volume, width=0.8, color=volume_colors,
-                alpha=0.5)
+        ax2.bar(time, volume, width=0.8, color=volume_colors, alpha=0.5)
 
         # Добавление сетки
         ax1.grid(True)
         # Поворот подписей оси x
-        ax1.set_xticklabels(time, rotation=45, ha='right')
+        ax1.set_xticklabels(time, rotation=45, ha="right")
 
         """
         # Поворот подписей оси x
@@ -88,21 +91,25 @@ class Graphic:
         """
 
         # Подключение регулирования масштаба колесиком мыши
-        ax1.axis('auto')
+        ax1.axis("auto")
         # Отображение легенды
         ax1.legend()
         # Отображение графика
         plt.show()
+
+
 pass
 
 
 if __name__ == "__main__":
     shares = Servises.Services.GetHistoricCandle(
-                                                 Ticker="SBER", From=datetime.utcnow() - timedelta(days=400),
-                                                 To=datetime.utcnow(), Interval=CandleInterval.CANDLE_INTERVAL_DAY,
-                                                 IntegerRepresentationTime=False)
+        Ticker="SBER",
+        From=datetime.utcnow() - timedelta(days=400),
+        To=datetime.utcnow(),
+        Interval=CandleInterval.CANDLE_INTERVAL_DAY,
+        IntegerRepresentationTime=False,
+    )
 
-    a = {}
     m = [["time", "value"]]
     for i in range(1, len(shares["history"])):
         t = shares["history"][i][0]
@@ -110,12 +117,10 @@ if __name__ == "__main__":
         m.append([t, v])
 
     indicator = {
-        "black":
-            {
-                "history": m,
-                "alpha": 0.5  # Пример значения прозрачности (от 0 до 1)
-            }
+        "black": {
+            "history": m,
+            "alpha": 0.5,  # Пример значения прозрачности (от 0 до 1)
+        }
     }
 
     Graphic.PrintGraphic(shares, indicator)
-

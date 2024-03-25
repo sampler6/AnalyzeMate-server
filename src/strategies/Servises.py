@@ -1,11 +1,14 @@
+from datetime import datetime, timedelta
 from time import sleep
-from datetime import timedelta
-from tinkoff.invest import Client, InstrumentIdType, CandleInterval
-from config import TOKEN, STOCK_MARKET
-class Services:
+from typing import Any
 
+from config import STOCK_MARKET, TOKEN
+from tinkoff.invest import CandleInterval, Client, InstrumentIdType, Share
+
+
+class Services:
     @staticmethod
-    def GetShares(Ticker):
+    def GetShares(Ticker: str) -> Share:
         """
         Получает информацию о ценной бумаге по её тикеру.
 
@@ -16,14 +19,18 @@ class Services:
         """
         with Client(TOKEN) as client:
             try:
-                share = client.instruments.share_by(id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_TICKER,
-                                                    class_code=STOCK_MARKET, id=Ticker)
+                share = client.instruments.share_by(
+                    id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_TICKER, class_code=STOCK_MARKET, id=Ticker
+                )
                 return share.instrument
-            except:
+            except:  # noqa
+                # Отработка ошибки происходит через консольные сообщения, а не нормальные exception у SDK
                 return Exception("Отсутсвует бумага с указанным  тикером")
 
     @staticmethod
-    def GetHistoricCandle(Ticker, From, To, Interval, IntegerRepresentationTime):
+    def GetHistoricCandle(
+        Ticker: str, From: datetime, To: datetime, Interval: CandleInterval, IntegerRepresentationTime: bool
+    ) -> dict:
         """
         Получает исторические данные свечей для заданного тикера и временного интервала.
         :param Token: str
@@ -45,17 +52,12 @@ class Services:
         Во избежание превышения лимита запросов внутри присутсвует кулдаун
         """
         sizeIntervalDays = timedelta(days=0)
-        if Interval == CandleInterval.CANDLE_INTERVAL_1_MIN:
-            sizeIntervalDays = timedelta(days=1)
-        elif Interval == CandleInterval.CANDLE_INTERVAL_2_MIN:
-            sizeIntervalDays = timedelta(days=1)
-        elif Interval == CandleInterval.CANDLE_INTERVAL_3_MIN:
-            sizeIntervalDays = timedelta(days=1)
-        elif Interval == CandleInterval.CANDLE_INTERVAL_5_MIN:
-            sizeIntervalDays = timedelta(days=1)
-        elif Interval == CandleInterval.CANDLE_INTERVAL_10_MIN:
-            sizeIntervalDays = timedelta(days=1)
-        elif Interval == CandleInterval.CANDLE_INTERVAL_15_MIN:
+        if (
+            Interval == CandleInterval.CANDLE_INTERVAL_1_MIN
+            or Interval == CandleInterval.CANDLE_INTERVAL_2_MIN
+            or (Interval == CandleInterval.CANDLE_INTERVAL_3_MIN or Interval == CandleInterval.CANDLE_INTERVAL_5_MIN)
+            or (Interval == CandleInterval.CANDLE_INTERVAL_10_MIN or Interval == CandleInterval.CANDLE_INTERVAL_15_MIN)
+        ):
             sizeIntervalDays = timedelta(days=1)
         elif Interval == CandleInterval.CANDLE_INTERVAL_30_MIN:
             sizeIntervalDays = timedelta(days=2)
@@ -79,12 +81,9 @@ class Services:
             m = [["time", "open", "close", "high", "low", "volume"]]
             currentDate = From
             c = 0
-            while (currentDate + sizeIntervalDays < To):
+            while currentDate + sizeIntervalDays < To:
                 r = client.market_data.get_candles(
-                    figi=share.figi,
-                    from_=currentDate,
-                    to=currentDate + sizeIntervalDays,
-                    interval=Interval
+                    figi=share.figi, from_=currentDate, to=currentDate + sizeIntervalDays, interval=Interval
                 )
 
                 for i in range(len(r.candles)):
@@ -94,12 +93,12 @@ class Services:
                     low = Services._cast_money(r.candles[i].low)
                     volume = r.candles[i].volume
 
-                    if IntegerRepresentationTime:
-                        date = (r.candles[i].time).timestamp() * 1000
+                    if IntegerRepresentationTime:  # noqa
+                        date = r.candles[i].time.timestamp() * 1000
                     else:
                         date = r.candles[i].time
 
-                    m.append([date, op, close, high, low, volume])
+                    m.append([date, float(op), float(close), float(high), float(low), float(volume)])  # type: ignore
 
                 currentDate += sizeIntervalDays
 
@@ -111,12 +110,7 @@ class Services:
                 print(c)
                 c += 1
 
-            r = client.market_data.get_candles(
-                figi=share.figi,
-                from_=currentDate,
-                to=To,
-                interval=Interval
-            )
+            r = client.market_data.get_candles(figi=share.figi, from_=currentDate, to=To, interval=Interval)
 
             for i in range(len(r.candles)):
                 op = Services._cast_money(r.candles[i].open)
@@ -125,24 +119,31 @@ class Services:
                 low = Services._cast_money(r.candles[i].low)
                 volume = r.candles[i].volume
 
-                if IntegerRepresentationTime:
-                    date = (r.candles[i].time).timestamp() * 1000
+                if IntegerRepresentationTime:  # noqa
+                    date = r.candles[i].time.timestamp() * 1000
                 else:
                     date = r.candles[i].time
 
-                m.append([date, op, close, high, low, volume])
+                m.append([date, float(op), float(close), float(high), float(low), float(volume)])  # type: ignore
 
             dic["history"] = m
         return dic
 
     @staticmethod
-    def _cast_money(v):
+    def _cast_money(v: Any) -> float:
         return v.units + v.nano / 1e9
+
+
 pass
 
 if __name__ == "__main__":
     from datetime import datetime, timedelta
-    shares = Services.GetHistoricCandle(Ticker="SBER", From=datetime.utcnow() - timedelta(days=1000),
-                                        To=datetime.utcnow(), Interval=CandleInterval.CANDLE_INTERVAL_DAY,
-                                        IntegerRepresentationTime=False)
+
+    shares = Services.GetHistoricCandle(
+        Ticker="SBER",
+        From=datetime.utcnow() - timedelta(days=1000),
+        To=datetime.utcnow(),
+        Interval=CandleInterval.CANDLE_INTERVAL_DAY,
+        IntegerRepresentationTime=False,
+    )
     print(shares)

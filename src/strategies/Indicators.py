@@ -1,12 +1,15 @@
 from datetime import datetime, timedelta
-from tinkoff.invest import CandleInterval
-import Servises
+
 import Graphic
+import Servises
+from tinkoff.invest import CandleInterval
+
 
 class Indicators:
+    # В процессе написания! Можно не смотреть
     @staticmethod
-    def CalculateRSI(data, window):
-        history = data['history'][1:]  # пропускаем строку заголовков
+    def CalculateRSI(data, window):  # type: ignore
+        history = data["history"][1:]  # пропускаем строку заголовков
         time = [entry[0] for entry in history]
         close_prices = [entry[2] for entry in history]
         ema_values = []
@@ -22,7 +25,7 @@ class Indicators:
             "ticker": data["ticker"],
             "timeframe": data["timeframe"],
             "indicator": "EMA",
-            "history": [["time", "value"]]
+            "history": [["time", "value"]],
         }
 
         # Вычисление EMA для остальных точек
@@ -35,17 +38,20 @@ class Indicators:
 
 
 if __name__ == "__main__":
-    shares = Servises.Services.GetHistoricCandle(Ticker="SBER", From=datetime.utcnow() - timedelta(days=400),
-                                                 To=datetime.utcnow(), Interval=CandleInterval.CANDLE_INTERVAL_DAY,
-                                                 IntegerRepresentationTime=False)
+    shares = Servises.Services.GetHistoricCandle(
+        Ticker="SBER",
+        From=datetime.utcnow() - timedelta(days=400),
+        To=datetime.utcnow(),
+        Interval=CandleInterval.CANDLE_INTERVAL_DAY,
+        IntegerRepresentationTime=False,
+    )
 
     a = Indicators.CalculateRSI(shares, 10)
     indicator = {
-        "black":
-            {
-                "history": a,
-                "alpha": 1  # Пример значения прозрачности (от 0 до 1)
-            }
+        "black": {
+            "history": a,
+            "alpha": 1,  # Пример значения прозрачности (от 0 до 1)
+        }
     }
 
     Graphic.Graphic.PrintGraphic(shares, indicator)
