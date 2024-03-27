@@ -37,3 +37,12 @@ docker-compose -f docker-compose.test.yml up --build
 В проекте используется pre-commit. Каждый коммит проходит проверку линтерами.
 Линтеры запускаются автоматически при коммите. Если хотите запустить их сами:
 - `pre-commit run --all-files`
+
+## alembic
+Для работы с alembic необходимо перейти в папку src:
+
+```bash
+cd src
+```
+
+И поменять в .env DB_HOST=db -> DB_HOST=localhost

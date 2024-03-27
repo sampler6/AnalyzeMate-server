@@ -19,6 +19,8 @@ httpx = "^0.27.0"
 fastapi-users = {extras = ["sqlalchemy"], version = "^13.0.0"}
 redis = "^5.0.3"
 python-multipart = "^0.0.9"
+tinkoff-investments = "^0.2.0b96"
+matplotlib = "^3.8.3"
 
 [tool.poetry.dev-dependencies]
 mypy = "^1.9.0"
