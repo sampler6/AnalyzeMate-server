@@ -1,9 +1,11 @@
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import graphic
 from servises import Services
 from tinkoff.invest import CandleInterval
+
+from strategies.base import get_tinkoff_client
 
 
 class Indicators:
@@ -38,16 +40,17 @@ class Indicators:
         return result
 
 
-if __name__ == "__main__":
-    service = Services()
-    shares = asyncio.run(
-        service.get_historic_candle(
-            ticker="SBER",
-            from_date=datetime.utcnow() - timedelta(days=400),
-            to_date=datetime.utcnow(),
-            interval=CandleInterval.CANDLE_INTERVAL_DAY,
-            integer_representation_time=False,
-        )
+async def main() -> None:
+    # В API будем через Depends получать. Тут только так(
+    client = await anext(get_tinkoff_client)
+
+    service = Services(client)
+    shares = await service.get_historic_candle(
+        ticker="SBER",
+        from_date=datetime.now(timezone.utc) - timedelta(days=400),
+        to_date=datetime.now(timezone.utc),
+        interval=CandleInterval.CANDLE_INTERVAL_DAY,
+        integer_representation_time=False,
     )
 
     a = Indicators.calculate_rsi(shares, 10)
@@ -60,3 +63,7 @@ if __name__ == "__main__":
 
     graphic.Graphic.print_graphic(shares, indicator)
     print(a)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

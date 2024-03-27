@@ -1,10 +1,12 @@
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import matplotlib.pyplot as plt
 from servises import Services
 from tinkoff.invest import CandleInterval
+
+from strategies.base import get_tinkoff_client
 
 
 class Graphic:
@@ -99,17 +101,18 @@ class Graphic:
         plt.show()
 
 
-if __name__ == "__main__":
-    service = Services()
+async def main() -> None:
+    # В API будем через Depends получать. Тут только так(
+    client = await anext(get_tinkoff_client)
 
-    shares = asyncio.run(
-        service.get_historic_candle(
-            ticker="SBER",
-            from_date=datetime.utcnow() - timedelta(days=400),
-            to_date=datetime.utcnow(),
-            interval=CandleInterval.CANDLE_INTERVAL_DAY,
-            integer_representation_time=False,
-        )
+    service = Services(client)
+
+    shares = await service.get_historic_candle(
+        ticker="SBER",
+        from_date=datetime.now(timezone.utc) - timedelta(days=400),
+        to_date=datetime.now(timezone.utc),
+        interval=CandleInterval.CANDLE_INTERVAL_DAY,
+        integer_representation_time=False,
     )
 
     m = [["time", "value"]]
@@ -126,3 +129,7 @@ if __name__ == "__main__":
     }
 
     Graphic.print_graphic(shares, indicator)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

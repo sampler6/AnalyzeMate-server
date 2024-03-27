@@ -1,36 +1,31 @@
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from config import STOCK_MARKET
-from fastapi import Depends
 from tinkoff.invest import CandleInterval, InstrumentIdType, Share
 from tinkoff.invest.async_services import AsyncServices
 
-from strategies.base import get_async_tinkoff_api_client
+from strategies.base import get_tinkoff_client
 
 
 class Services:
-    def __init__(self, client: AsyncServices = Depends(get_async_tinkoff_api_client)):
+    def __init__(self, client: AsyncServices):
         self.client = client
 
-    async def get_shares(self, Ticker: str) -> Share:
+    async def get_shares(self, ticker: str) -> Share:
         """
         Получает информацию о ценной бумаге по её тикеру.
 
-        :param Ticker: Тикер ценной бумаги.
-        :type Ticker: str
+        :param ticker: Тикер ценной бумаги.
+        :type ticker: str
         :return: Информация о ценной бумаге.
         :rtype: Instrument or Exception
         """
-        try:
-            share = await self.client.instruments.share_by(
-                id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_TICKER, class_code=STOCK_MARKET, id=Ticker
-            )
-            return share.instrument
-        except:  # noqa
-            # Отработка ошибки происходит через консольные сообщения, а не нормальные exception у SDK
-            return Exception("Отсутсвует бумага с указанным  тикером")
+        share = await self.client.instruments.share_by(
+            id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_TICKER, class_code=STOCK_MARKET, id=ticker
+        )
+        return share.instrument
 
     async def get_historic_candle(
         self,
@@ -39,11 +34,9 @@ class Services:
         to_date: datetime,
         interval: CandleInterval,
         integer_representation_time: bool,
-    ) -> dict:
+    ) -> dict | None:
         """
         Получает исторические данные свечей для заданного тикера и временного интервала.
-        :param Token: str
-            Ключ доступа (токен) к API Tinkoff Invest.
         :param ticker: str
             Тикер инструмента.
         :param from_date: datetime.datetime
@@ -85,26 +78,28 @@ class Services:
         dic = dict()
         dic["figi"] = share.figi
         dic["ticker"] = ticker
-        dic["timeframe"] = str(interval).split(".")[1]
+        dic["timeframe"] = interval.name
         m = [["time", "open", "close", "high", "low", "volume"]]
         current_date = from_date
         c = 0
+        response = None
+
         while current_date + size_interval_days < to_date:
-            r = await self.client.market_data.get_candles(
+            response = await self.client.market_data.get_candles(
                 figi=share.figi, from_=current_date, to=current_date + size_interval_days, interval=interval
             )
 
-            for i in range(len(r.candles)):
-                op = self._cast_money(r.candles[i].open)
-                close = self._cast_money(r.candles[i].close)
-                high = self._cast_money(r.candles[i].high)
-                low = self._cast_money(r.candles[i].low)
-                volume = r.candles[i].volume
+            for i in range(len(response.candles)):
+                op = self._cast_money(response.candles[i].open)
+                close = self._cast_money(response.candles[i].close)
+                high = self._cast_money(response.candles[i].high)
+                low = self._cast_money(response.candles[i].low)
+                volume = response.candles[i].volume
 
                 if integer_representation_time:  # noqa
-                    date = r.candles[i].time.timestamp() * 1000
+                    date = response.candles[i].time.timestamp() * 1000
                 else:
-                    date = r.candles[i].time
+                    date = response.candles[i].time
 
                 m.append([date, float(op), float(close), float(high), float(low), float(volume)])  # type: ignore
 
@@ -118,21 +113,23 @@ class Services:
             print(c)
             c += 1
 
-            r = await self.client.market_data.get_candles(
+            response = await self.client.market_data.get_candles(
                 figi=share.figi, from_=current_date, to=to_date, interval=interval
             )
 
-        for i in range(len(r.candles)):
-            op = self._cast_money(r.candles[i].open)
-            close = self._cast_money(r.candles[i].close)
-            high = self._cast_money(r.candles[i].high)
-            low = self._cast_money(r.candles[i].low)
-            volume = r.candles[i].volume
+        if not response:
+            return None
+        for i in range(len(response.candles)):
+            op = self._cast_money(response.candles[i].open)
+            close = self._cast_money(response.candles[i].close)
+            high = self._cast_money(response.candles[i].high)
+            low = self._cast_money(response.candles[i].low)
+            volume = response.candles[i].volume
 
             if integer_representation_time:  # noqa
-                date = r.candles[i].time.timestamp() * 1000
+                date = response.candles[i].time.timestamp() * 1000
             else:
-                date = r.candles[i].time
+                date = response.candles[i].time
 
             m.append([date, float(op), float(close), float(high), float(low), float(volume)])  # type: ignore
 
@@ -146,16 +143,24 @@ class Services:
 
 pass
 
-if __name__ == "__main__":
+
+async def main() -> None:
     from datetime import datetime, timedelta
 
-    service = Services()
+    # В API будем через Depends получать. Тут только так(
+    client = await anext(get_tinkoff_client)
 
-    shares = service.get_historic_candle(
+    service = Services(client)
+
+    shares = await service.get_historic_candle(
         ticker="SBER",
-        from_date=datetime.utcnow() - timedelta(days=1000),
-        to_date=datetime.utcnow(),
+        from_date=datetime.now(timezone.utc) - timedelta(days=400),
+        to_date=datetime.now(timezone.utc),
         interval=CandleInterval.CANDLE_INTERVAL_DAY,
         integer_representation_time=False,
     )
     print(shares)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
