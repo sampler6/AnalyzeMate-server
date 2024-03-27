@@ -1,7 +1,9 @@
 from datetime import datetime
+from typing import Any
 
 from db.base import Base
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column
 
 
@@ -15,4 +17,4 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     name: Mapped[str] = mapped_column(nullable=True)
     surname: Mapped[str] = mapped_column(nullable=True)
     birthdate: Mapped[datetime] = mapped_column(nullable=False)
-    options: Mapped[str] = mapped_column(nullable=True)
+    config: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=True)
