@@ -10,6 +10,7 @@ from strategies.base import get_tinkoff_client
 from strategies.intrevals import interval_dict
 
 
+# TODO: убрать все print и подумать, как уменьшить число запросов к бирже
 class Services:
     def __init__(self, client: AsyncServices):
         self.client = client
