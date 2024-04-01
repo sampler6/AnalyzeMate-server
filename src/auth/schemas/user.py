@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 from fastapi_users import schemas
@@ -19,7 +19,7 @@ class UserCreate(schemas.BaseUserCreate):
     patronymic: str
     name: str
     surname: str
-    birthdate: datetime = Field(default=datetime.utcnow())
+    birthdate: datetime = Field(default=datetime.now(timezone.utc))
     config: Optional[dict[str, Any]]
 
 
