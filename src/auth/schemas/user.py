@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi_users import schemas
 from pydantic import Field
@@ -11,7 +11,7 @@ class UserRead(schemas.BaseUser[int]):
     name: str
     surname: str
     birthdate: datetime
-    options: Optional[str]
+    config: Optional[dict[str, Any]]
 
 
 class UserCreate(schemas.BaseUserCreate):
@@ -20,7 +20,7 @@ class UserCreate(schemas.BaseUserCreate):
     name: str
     surname: str
     birthdate: datetime = Field(default=datetime.utcnow())
-    options: Optional[str]
+    config: Optional[dict[str, Any]]
 
 
 class UserUpdate(schemas.BaseUserUpdate):
@@ -29,4 +29,4 @@ class UserUpdate(schemas.BaseUserUpdate):
     name: Optional[str]
     surname: Optional[str]
     birthdate: Optional[datetime]
-    options: Optional[str]
+    config: Optional[dict[str, Any]]
