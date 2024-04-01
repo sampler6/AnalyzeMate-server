@@ -1,6 +1,5 @@
 from api.api import router as api_router
 from fastapi import FastAPI
-from fastapi.security import HTTPBearer
 from starlette.middleware.cors import CORSMiddleware
 
 origins = [
@@ -21,5 +20,3 @@ app.add_middleware(
 )
 
 app.include_router(api_router)
-
-auth_schema = HTTPBearer()

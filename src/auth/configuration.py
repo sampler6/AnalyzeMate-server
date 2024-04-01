@@ -1,7 +1,7 @@
 from db.base import redis
 from fastapi_users.authentication import AuthenticationBackend, BearerTransport, RedisStrategy
 
-bearer_transport = BearerTransport(tokenUrl="auth/token1/")
+bearer_transport = BearerTransport(tokenUrl="auth/login")
 
 
 def get_redis_strategy() -> RedisStrategy:  # type: ignore

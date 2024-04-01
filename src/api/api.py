@@ -10,4 +10,4 @@ router.include_router(user_router)
 
 @router.get("/check_startup/")
 async def check_startup() -> BaseResponse:
-    return BaseResponse(status_code=200, description="Application startup successfully completed")
+    return BaseResponse(description="Application startup successfully completed")
