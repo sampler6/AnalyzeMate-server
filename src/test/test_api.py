@@ -9,4 +9,4 @@ def test_check_startup() -> None:
     assert response.status_code == 200
     resp_json = response.json()
     assert isinstance(resp_json, dict)
-    assert resp_json["description"] == "Application startup successfully completed"
+    assert resp_json["description"] == "Application startup successfully complete"
