@@ -1,4 +1,5 @@
 from api.api import router as api_router
+from exceptions.base import exception_traceback_middleware
 from fastapi import FastAPI
 from fastapi.security import HTTPBearer
 
@@ -15,6 +16,8 @@ app = FastAPI(
         }
     },
 )
+
+app.middleware("http")(exception_traceback_middleware)
 
 app.include_router(api_router)
 
