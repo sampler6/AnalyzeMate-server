@@ -1,32 +1,111 @@
 import asyncio
+import json
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, List
 
 from config import STOCK_MARKET
-from tinkoff.invest import CandleInterval, InstrumentIdType, Share
+from tinkoff.invest import CandleInterval, InstrumentIdType
 from tinkoff.invest.async_services import AsyncServices
 
-from strategies.base import get_tinkoff_client
+from strategies.base import MAX_INTERVAL_SIZE, get_tinkoff_client
 
 
-# TODO: убрать все print и подумать, как уменьшить число запросов к бирже
 class Services:
     def __init__(self, client: AsyncServices):
         self.client = client
 
-    async def get_shares(self, ticker: str) -> Share:
+    async def get_shares(self, ticker: str) -> dict:
         """
         Получает информацию о ценной бумаге по её тикеру.
 
         :param ticker: Тикер ценной бумаги.
         :type ticker: str
-        :return: Информация о ценной бумаге.
+        :return: dict
+            - ticker: string Тикер
+            - name: string Эмитент
+            - lot: int Лотность
+            - min_price_increment: double Минимальный шаг цены
+            - currency: string Валюта
+            - country: string Страна
+            - sector: string Сектор деятельности
+            - liquidity: bool
+                True - Бумага ликвидна
+                False - Бумага не ликвидна
+            Информация о ценной бумаге.
         :rtype: Instrument or Exception
         """
-        share = await self.client.instruments.share_by(
+        responce = await self.client.instruments.share_by(
             id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_TICKER, class_code=STOCK_MARKET, id=ticker
         )
-        return share.instrument
+        share = {
+            "ticker": responce.instrument.ticker,
+            "name": responce.instrument.name,
+            "lot": responce.instrument.lot,
+            "currency": responce.instrument.currency,
+            "country": responce.instrument.country_of_risk_name,
+            "sector": responce.instrument.sector,
+            "min_price_increment": responce.instrument.min_price_increment,
+            "liquidity": responce.instrument.liquidity_flag,
+        }
+        return share
+
+    async def get_shares_json(self, ticker: str, path: str) -> None:
+        """
+        Получает информацию о ценной бумаге по её тикеру и сохраняет её в JSON файл.
+
+        :param ticker: Тикер ценной бумаги.
+        :type ticker: str
+        :param path: Путь к файлу JSON, в который будет сохранена информация о ценной бумаге.
+        :type path: str
+        """
+        share = await self.get_shares(ticker)
+        with open(path, "w") as f:  # noqa
+            json.dump(share, f)
+
+    async def _get_candles(
+        self,
+        figi: str,
+        from_date: datetime,
+        to_date: datetime,
+        interval: CandleInterval,
+        integer_representation_time: bool,
+    ) -> List[List[float]]:
+        """
+        Получает исторические данные свечей для заданного тикера и временного интервала.
+        :param figi: str
+            FIGI инструмента.
+        :param from_date: datetime.datetime
+            Начальная дата и время периода.
+        :param to_date: datetime.datetime
+            Конечная дата и время периода.
+        :param interval: enum CandleInterval
+            Временной интервал свечей (CandleInterval).
+        :param integer_representation_time: bool
+            True - Десятичное представление времени(мс)
+            False - Строкое представление времени.
+        :return: list
+            Список с информацией о свечах.
+        """
+        array_candles = []
+        response = await self.client.market_data.get_candles(figi=figi, from_=from_date, to=to_date, interval=interval)
+
+        for i in range(len(response.candles)):
+            open_price = self._cast_money(response.candles[i].open)
+            close_price = self._cast_money(response.candles[i].close)
+            high_price = self._cast_money(response.candles[i].high)
+            low_price = self._cast_money(response.candles[i].low)
+            volume = response.candles[i].volume
+
+            if integer_representation_time:  # noqa
+                date = int(response.candles[i].time.timestamp() * 1000)
+            else:
+                date = response.candles[i].time
+
+            array_candles.append(
+                [date, float(open_price), float(close_price), float(high_price), float(low_price), float(volume)]
+            )  # type: ignore
+
+        return array_candles
 
     async def get_historic_candle(
         self,
@@ -48,94 +127,87 @@ class Services:
             Временной интервал свечей (CandleInterval).
         :param integer_representation_time: bool
             True - Десятичное представление времени(мс)
-            False - Строкое представление времени.
+            False - Строковое представление времени.
         :return: dict
             Словарь с информацией об инструменте.
 
         Во избежание превышения лимита запросов внутри присутсвует кулдаун
         """
-        size_interval_days = timedelta(days=0)
-        if (
-            interval == CandleInterval.CANDLE_INTERVAL_1_MIN
-            or interval == CandleInterval.CANDLE_INTERVAL_2_MIN
-            or (interval == CandleInterval.CANDLE_INTERVAL_3_MIN or interval == CandleInterval.CANDLE_INTERVAL_5_MIN)
-            or (interval == CandleInterval.CANDLE_INTERVAL_10_MIN or interval == CandleInterval.CANDLE_INTERVAL_15_MIN)
+        share = await self.client.instruments.share_by(
+            id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_TICKER, class_code=STOCK_MARKET, id=ticker
+        )
+        size_interval_days = MAX_INTERVAL_SIZE[interval]
+        if (from_date < share.instrument.first_1min_candle_date and size_interval_days < timedelta(days=1)) or (
+            from_date < share.instrument.first_1day_candle_date
         ):
-            size_interval_days = timedelta(days=1)
-        elif interval == CandleInterval.CANDLE_INTERVAL_30_MIN:
-            size_interval_days = timedelta(days=2)
-        elif interval == CandleInterval.CANDLE_INTERVAL_HOUR:
-            size_interval_days = timedelta(days=7)
-        elif interval == CandleInterval.CANDLE_INTERVAL_4_HOUR:
-            size_interval_days = timedelta(days=31)
-        elif interval == CandleInterval.CANDLE_INTERVAL_DAY:
-            size_interval_days = timedelta(days=366)
-        elif interval == CandleInterval.CANDLE_INTERVAL_WEEK:
-            size_interval_days = timedelta(days=732)
-        elif interval == CandleInterval.CANDLE_INTERVAL_MONTH:
-            size_interval_days = timedelta(days=3660)
+            raise AttributeError("За указанный период отсутсвуют данные о свечах")
 
-        share = await self.get_shares("SBER")
         dic = dict()
-        dic["figi"] = share.figi
         dic["ticker"] = ticker
         dic["timeframe"] = interval.name
-        m = [["time", "open", "close", "high", "low", "volume"]]
+        array_candles = [["time", "open", "close", "high", "low", "volume"]]
         current_date = from_date
-        c = 0
-        response = None
 
         while current_date + size_interval_days < to_date:
-            response = await self.client.market_data.get_candles(
-                figi=share.figi, from_=current_date, to=current_date + size_interval_days, interval=interval
-            )
+            array_candles += await self._get_candles(
+                figi=share.instrument.figi,
+                from_date=current_date,
+                to_date=current_date + size_interval_days,
+                interval=interval,
+                integer_representation_time=integer_representation_time,
+            )  # type: ignore
 
-            for i in range(len(response.candles)):
-                op = self._cast_money(response.candles[i].open)
-                close = self._cast_money(response.candles[i].close)
-                high = self._cast_money(response.candles[i].high)
-                low = self._cast_money(response.candles[i].low)
-                volume = response.candles[i].volume
-
-                if integer_representation_time:  # noqa
-                    date = response.candles[i].time.timestamp() * 1000
-                else:
-                    date = response.candles[i].time
-
-                m.append([date, float(op), float(close), float(high), float(low), float(volume)])  # type: ignore
-
-            current_date += size_interval_days
+            current_date += size_interval_days  # type: ignore
 
             #   Кулдаун в целях обхода лимитов на запросы
             await asyncio.sleep(0.2)
 
-            #   Счётчик для отображения количества запросов к API
-            #   Возможно удаление без последствий
-            print(c)
-            c += 1
+        array_candles += await self._get_candles(
+            figi=share.instrument.figi,
+            from_date=current_date,
+            to_date=to_date,
+            interval=interval,
+            integer_representation_time=integer_representation_time,
+        )  # type: ignore
 
-            response = await self.client.market_data.get_candles(
-                figi=share.figi, from_=current_date, to=to_date, interval=interval
-            )
-
-        if not response:
-            return None
-        for i in range(len(response.candles)):
-            op = self._cast_money(response.candles[i].open)
-            close = self._cast_money(response.candles[i].close)
-            high = self._cast_money(response.candles[i].high)
-            low = self._cast_money(response.candles[i].low)
-            volume = response.candles[i].volume
-
-            if integer_representation_time:  # noqa
-                date = response.candles[i].time.timestamp() * 1000
-            else:
-                date = response.candles[i].time
-
-            m.append([date, float(op), float(close), float(high), float(low), float(volume)])  # type: ignore
-
-        dic["history"] = m
+        dic["history"] = array_candles  # type: ignore
         return dic
+
+    async def get_historic_candle_json(
+        self,
+        ticker: str,
+        path: str,
+        from_date: datetime,
+        to_date: datetime,
+        interval: CandleInterval,
+        integer_representation_time: bool,
+    ) -> None:
+        """
+        Получает исторические данные свечей для заданного тикера и временного интервала и сохраняет их в JSON файл.
+
+        :param ticker: str
+            Тикер инструмента.
+        :param path: str
+            Путь к файлу JSON, в который будет сохранен результат.
+        :param from_date: datetime.datetime
+            Начальная дата и время периода.
+        :param to_date: datetime.datetime
+            Конечная дата и время периода.
+        :param interval: enum CandleInterval
+            Временной интервал свечей (CandleInterval).
+        :param integer_representation_time: bool
+            True - Десятичное представление времени(мс)
+            False - Строковое представление времени.
+        """
+        candle_data = await self.get_historic_candle(
+            ticker=ticker,
+            from_date=from_date,
+            to_date=to_date,
+            interval=interval,
+            integer_representation_time=integer_representation_time,
+        )
+        with open(path, "w") as f:  # noqa
+            json.dump(candle_data, f)
 
     @staticmethod
     def _cast_money(v: Any) -> float:
