@@ -33,7 +33,7 @@ services:
     build:
       context: .
     env_file:
-      - .env-non-dev
+      - .env
     container_name: AnalyzeMate_app
     ports:
       - 8000:8000
