@@ -8,7 +8,8 @@ import numpy as np
 from servises import Services
 from tinkoff.invest import CandleInterval
 
-from strategies.base import ANGLE_INCLINATION, SIZE_TREND_WINDOW, get_tinkoff_client
+from strategies.base import get_tinkoff_client
+from strategies.intrevals import angle_inclination, size_trend_window
 
 
 class Indicators:
@@ -26,16 +27,16 @@ class Indicators:
         prices = [(entry[1] + entry[2]) / 2 for entry in history]
         trends = []
 
-        for i in range(0, len(prices), SIZE_TREND_WINDOW):
+        for i in range(0, len(prices), size_trend_window):
             # Индексы для текущего окна размером 10
-            indices = list(range(i, min(i + SIZE_TREND_WINDOW, len(prices))))
+            indices = list(range(i, min(i + size_trend_window, len(prices))))
             x = np.arange(len(indices))  # Создание массива индексов
-            y = np.array(prices[i : i + SIZE_TREND_WINDOW])  # Получение значений цен для текущего окна
+            y = np.array(prices[i : i + size_trend_window])  # Получение значений цен для текущего окна
             A = np.vstack([x, np.ones(len(x))]).T  # Построение матрицы для аппроксимации
             slope, intercept = np.linalg.lstsq(A, y, rcond=None)[0]  # Линейная аппроксимация
-            if slope > ANGLE_INCLINATION:
+            if slope > angle_inclination:
                 trends.append([time[indices[0]], prices[indices[0]], "Up", slope])  # Сохранение коэффициента наклона
-            elif slope < -ANGLE_INCLINATION:
+            elif slope < -angle_inclination:
                 trends.append([time[indices[0]], prices[indices[0]], "Down", slope])  # Сохранение коэффициента наклона
             else:
                 trends.append([time[indices[0]], prices[indices[0]], "Row", slope])  # Сохранение коэффициента наклона

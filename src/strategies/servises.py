@@ -7,7 +7,8 @@ from config import STOCK_MARKET
 from tinkoff.invest import CandleInterval, InstrumentIdType
 from tinkoff.invest.async_services import AsyncServices
 
-from strategies.base import MAX_INTERVAL_SIZE, get_tinkoff_client
+from strategies.base import get_tinkoff_client
+from strategies.intrevals import interval_dict
 
 
 class Services:
@@ -136,7 +137,7 @@ class Services:
         share = await self.client.instruments.share_by(
             id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_TICKER, class_code=STOCK_MARKET, id=ticker
         )
-        size_interval_days = MAX_INTERVAL_SIZE[interval]
+        size_interval_days = interval_dict[interval]
         if (from_date < share.instrument.first_1min_candle_date and size_interval_days < timedelta(days=1)) or (
             from_date < share.instrument.first_1day_candle_date
         ):
