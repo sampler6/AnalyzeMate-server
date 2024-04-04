@@ -36,7 +36,7 @@ def downgrade() -> None:
                existing_type=sa.DateTime(timezone=True),
                type_=postgresql.TIMESTAMP(),
                existing_nullable=False)
-    op.add_column('securities', sa.Column('figi', sa.VARCHAR(), autoincrement=False, nullable=False))
-    op.add_column('securities', sa.Column('uid', sa.VARCHAR(), autoincrement=False, nullable=False))
+    op.add_column('securities', sa.Column('figi', sa.VARCHAR(), autoincrement=False, nullable=True))
+    op.add_column('securities', sa.Column('uid', sa.VARCHAR(), autoincrement=False, nullable=True))
     op.drop_constraint('securities_pm', 'securities', type_='primary')
     # ### end Alembic commands ###

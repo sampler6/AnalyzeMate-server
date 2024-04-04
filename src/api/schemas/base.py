@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
 
-class BaseResponse(BaseModel):
+class TestResponse(BaseModel):
     description: str | None

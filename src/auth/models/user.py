@@ -11,8 +11,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 class User(SQLAlchemyBaseUserTable[int], Base):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    email: Mapped[str] = mapped_column(unique=True)
+    id: Mapped[int] = mapped_column(primary_key=True)  # type: ignore
+    email: Mapped[str] = mapped_column(unique=True)  # type: ignore
     balance: Mapped[float] = mapped_column(nullable=False, default=0)
     patronymic: Mapped[str] = mapped_column(nullable=True)
     name: Mapped[str] = mapped_column(nullable=True)

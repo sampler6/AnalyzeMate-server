@@ -1,11 +1,10 @@
 from datetime import datetime
 
 from db.base import Base
-from sqlalchemy import DateTime, Integer, func
+from sqlalchemy import DateTime, ForeignKey, Integer, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 
-# TODO: Создать миграцию alembic
 class HistoricCandles(Base):
     __tablename__ = "historic_candle"
 
@@ -15,4 +14,5 @@ class HistoricCandles(Base):
     highest: Mapped[float]
     lowest: Mapped[float]
     volume: Mapped[int]
+    ticker: Mapped[str] = mapped_column(ForeignKey("securities.ticker"))
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
