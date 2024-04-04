@@ -1,7 +1,8 @@
-from typing import AsyncGenerator
+from typing import Any, AsyncGenerator, Iterable, Optional
 
 import redis.asyncio  # type: ignore
 from config import DB_HOST, DB_NAME, DB_PASS, DB_PORT, DB_USER, REDIS_HOST
+from sqlalchemy import Delete, Insert, Result, Select, Update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -21,3 +22,17 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
 
 class Base(DeclarativeBase):
     pass
+
+
+class BaseRepository:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def execute(self, statement: Select[Any] | Delete[Any] | Update[Any] | Insert[Any]) -> Result:
+        return await self.session.execute(statement)
+
+    async def all(self, statement: Select[Any] | Delete[Any] | Update[Any] | Insert[Any]) -> Iterable[Any]:
+        return (await self.execute(statement)).all()
+
+    async def one_or_none(self, statement: Select[Any] | Delete[Any] | Update[Any] | Insert[Any]) -> Optional[Any]:
+        return (await self.execute(statement)).one_or_none()

@@ -5,9 +5,14 @@ from sqlalchemy import DateTime, Integer, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 
-class PriceHistory(Base):
-    __tablename__ = "price_history"
+# TODO: Создать миграцию alembic
+class HistoricCandles(Base):
+    __tablename__ = "historic_candle"
 
     id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True)
-    price: Mapped[float]
+    open: Mapped[float]
+    close: Mapped[float]
+    highest: Mapped[float]
+    lowest: Mapped[float]
+    volume: Mapped[int]
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
