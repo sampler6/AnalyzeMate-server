@@ -24,6 +24,9 @@ class Services:
         :return: Информация о ценной бумаге.
         :rtype: Instrument or Exception
         """
+        if not STOCK_MARKET:
+            raise Exception("STOCK_MARKET is None")
+
         share = await self.client.instruments.share_by(
             id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_TICKER, class_code=STOCK_MARKET, id=ticker
         )
