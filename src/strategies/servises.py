@@ -3,16 +3,26 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from config import STOCK_MARKET
+from repositories.historic_candles import HistoricCandlesRepository
+from repositories.security import SecuritiesRepository
 from tinkoff.invest import CandleInterval, InstrumentIdType, Share
 from tinkoff.invest.async_services import AsyncServices
 
-from strategies.base import get_tinkoff_client
+from strategies.base import get_historic_candle_repository, get_securities_repository, get_tinkoff_client
+from strategies.intrevals import interval_dict
 
 
 # TODO: убрать все print и подумать, как уменьшить число запросов к бирже
 class Services:
-    def __init__(self, client: AsyncServices):
+    def __init__(
+        self,
+        client: AsyncServices,
+        securities_repository: SecuritiesRepository,
+        historic_candles_repository: HistoricCandlesRepository,
+    ) -> None:
         self.client = client
+        self.securities_repo = securities_repository
+        self.historic_candles_repo = historic_candles_repository
 
     async def get_shares(self, ticker: str) -> Share:
         """
@@ -23,6 +33,9 @@ class Services:
         :return: Информация о ценной бумаге.
         :rtype: Instrument or Exception
         """
+        if not STOCK_MARKET:
+            raise Exception("STOCK_MARKET is None")
+
         share = await self.client.instruments.share_by(
             id_type=InstrumentIdType.INSTRUMENT_ID_TYPE_TICKER, class_code=STOCK_MARKET, id=ticker
         )
@@ -54,26 +67,7 @@ class Services:
 
         Во избежание превышения лимита запросов внутри присутсвует кулдаун
         """
-        size_interval_days = timedelta(days=0)
-        if (
-            interval == CandleInterval.CANDLE_INTERVAL_1_MIN
-            or interval == CandleInterval.CANDLE_INTERVAL_2_MIN
-            or (interval == CandleInterval.CANDLE_INTERVAL_3_MIN or interval == CandleInterval.CANDLE_INTERVAL_5_MIN)
-            or (interval == CandleInterval.CANDLE_INTERVAL_10_MIN or interval == CandleInterval.CANDLE_INTERVAL_15_MIN)
-        ):
-            size_interval_days = timedelta(days=1)
-        elif interval == CandleInterval.CANDLE_INTERVAL_30_MIN:
-            size_interval_days = timedelta(days=2)
-        elif interval == CandleInterval.CANDLE_INTERVAL_HOUR:
-            size_interval_days = timedelta(days=7)
-        elif interval == CandleInterval.CANDLE_INTERVAL_4_HOUR:
-            size_interval_days = timedelta(days=31)
-        elif interval == CandleInterval.CANDLE_INTERVAL_DAY:
-            size_interval_days = timedelta(days=366)
-        elif interval == CandleInterval.CANDLE_INTERVAL_WEEK:
-            size_interval_days = timedelta(days=732)
-        elif interval == CandleInterval.CANDLE_INTERVAL_MONTH:
-            size_interval_days = timedelta(days=3660)
+        size_interval_days = interval_dict[interval]
 
         share = await self.get_shares("SBER")
         dic = dict()
@@ -83,7 +77,7 @@ class Services:
         m = [["time", "open", "close", "high", "low", "volume"]]
         current_date = from_date
         c = 0
-        response = None
+        response = None  # noqa
 
         while current_date + size_interval_days < to_date:
             response = await self.client.market_data.get_candles(
@@ -107,16 +101,16 @@ class Services:
             current_date += size_interval_days
 
             #   Кулдаун в целях обхода лимитов на запросы
+            # TODO: заменить на глобальный счетчик запросов за минуту
             await asyncio.sleep(0.2)
 
             #   Счётчик для отображения количества запросов к API
             #   Возможно удаление без последствий
-            print(c)
             c += 1
 
-            response = await self.client.market_data.get_candles(
-                figi=share.figi, from_=current_date, to=to_date, interval=interval
-            )
+        response = await self.client.market_data.get_candles(
+            figi=share.figi, from_=current_date, to=to_date, interval=interval
+        )
 
         if not response:
             return None
@@ -146,16 +140,18 @@ pass
 
 
 async def main() -> None:
-    from datetime import datetime, timedelta
+    from datetime import datetime
 
     # В API будем через Depends получать. Тут только так(
     client = await anext(get_tinkoff_client)
+    securities_repository = await anext(get_securities_repository)
+    historic_candles_repository = await anext(get_historic_candle_repository)
 
-    service = Services(client)
+    service = Services(client, securities_repository, historic_candles_repository)
 
     shares = await service.get_historic_candle(
         ticker="SBER",
-        from_date=datetime.now(timezone.utc) - timedelta(days=400),
+        from_date=datetime.now(timezone.utc) - timedelta(days=1000),
         to_date=datetime.now(timezone.utc),
         interval=CandleInterval.CANDLE_INTERVAL_DAY,
         integer_representation_time=False,

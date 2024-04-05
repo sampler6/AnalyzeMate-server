@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 
 
-class BaseResponse(BaseModel):
-    status_code: int
+class TestResponse(BaseModel):
     description: str | None

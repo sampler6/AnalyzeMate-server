@@ -1,10 +1,3 @@
-from db.base import get_async_session
-from fastapi import Depends
-from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from auth.models import User
-
-
-async def get_user_db(session: AsyncSession = Depends(get_async_session)):  # type: ignore
-    yield SQLAlchemyUserDatabase(session, User)  # type: ignore
+from auth.configuration import auth_backend  # noqa
+from auth.user_manager import get_user_manager  # noqa
+from auth.models import User  # noqa

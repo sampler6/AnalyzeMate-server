@@ -33,14 +33,15 @@ services:
     build:
       context: .
     env_file:
-      - .env-non-dev
+      - .env
     container_name: AnalyzeMate_app
     ports:
       - 8000:8000
     depends_on:
       - db
       - redis
-    command: bash -c "while !</dev/tcp/db/5432; do sleep 1; done; alembic upgrade head & gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000"
+    command: bash -c "while !</dev/tcp/db/5432 && !</dev/tcp/redis/6379; do sleep 1; done; alembic upgrade head & gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000"
+    restart: always
     networks:
       Analyzemate-network:
 
