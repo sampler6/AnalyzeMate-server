@@ -3,17 +3,26 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from config import STOCK_MARKET
+from repositories.historic_candles import HistoricCandlesRepository
+from repositories.security import SecuritiesRepository
 from tinkoff.invest import CandleInterval, InstrumentIdType, Share
 from tinkoff.invest.async_services import AsyncServices
 
-from strategies.base import get_tinkoff_client
+from strategies.base import get_historic_candle_repository, get_securities_repository, get_tinkoff_client
 from strategies.intrevals import interval_dict
 
 
 # TODO: убрать все print и подумать, как уменьшить число запросов к бирже
 class Services:
-    def __init__(self, client: AsyncServices):
+    def __init__(
+        self,
+        client: AsyncServices,
+        securities_repository: SecuritiesRepository,
+        historic_candles_repository: HistoricCandlesRepository,
+    ) -> None:
         self.client = client
+        self.securities_repo = securities_repository
+        self.historic_candles_repo = historic_candles_repository
 
     async def get_shares(self, ticker: str) -> Share:
         """
@@ -135,8 +144,10 @@ async def main() -> None:
 
     # В API будем через Depends получать. Тут только так(
     client = await anext(get_tinkoff_client)
+    securities_repository = await anext(get_securities_repository)
+    historic_candles_repository = await anext(get_historic_candle_repository)
 
-    service = Services(client)
+    service = Services(client, securities_repository, historic_candles_repository)
 
     shares = await service.get_historic_candle(
         ticker="SBER",

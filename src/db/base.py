@@ -21,4 +21,4 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
 
 
 class Base(DeclarativeBase):
-    pass
+    __allow_unmapped__ = True
