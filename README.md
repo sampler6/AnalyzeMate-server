@@ -30,13 +30,7 @@ docker-compose up --build
 ## Запуск тестов
 
 ```bash
-docker-compose up --build
-```
-
-После запуска приложения:
-
-```bash
-pytest -rfs -vv --color yes
+docker-compose up -d --build; pytest -rfs -vv --color yes; docker-compose down
 ```
 
 ## git commit
