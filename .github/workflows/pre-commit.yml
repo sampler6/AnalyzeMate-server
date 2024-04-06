@@ -15,7 +15,7 @@ jobs:
     - name: Run pre-commit
       run: pre-commit run --all-files
 
-  Startup-Check:
+  run-tests:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/setup-python@v2
