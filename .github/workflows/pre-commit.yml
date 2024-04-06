@@ -10,7 +10,7 @@ jobs:
       with:
         python-version: "3.12.2"
     - name: Configure python
-      run: pip install --upgrade pip && pip install poetry && poetry install && pre-commit install
+      run: pip install --upgrade pip && pip install poetry && poetry install && pip install pre-commit && pre-commit install
 
     - name: Run pre-commit
       run: pre-commit run --all-files
@@ -21,10 +21,10 @@ jobs:
     - uses: actions/setup-python@v2
       with:
         python-version: "3.12.2"
+    - uses: actions/checkout@v2
     - name: Configure python
       run: pip install --upgrade pip && pip install poetry && poetry install && mv ./.env-non-dev ./.env
 
-    - uses: actions/checkout@v2
     - name: Build app
       run: docker-compose up --build
 
