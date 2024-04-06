@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from typing import Annotated, Any, Optional
 
 from fastapi_users import schemas
-from pydantic import AfterValidator, Field
+from pydantic import BeforeValidator, Field
 
 
 def password_validator(password: str) -> str:
@@ -29,7 +29,7 @@ class UserRead(schemas.BaseUser[int]):
 
 
 class UserCreate(schemas.BaseUserCreate):
-    password: Annotated[str, AfterValidator(password_validator)]
+    password: Annotated[str, BeforeValidator(password_validator)]
     balance: Optional[float]
     patronymic: str
     name: str
