@@ -1,5 +1,5 @@
 name: Pre-commit
-on: [pull_request]
+on: [pull_request, push]
 
 jobs:
   Code-Quality:
@@ -9,24 +9,24 @@ jobs:
     - uses: actions/setup-python@v2
       with:
         python-version: "3.12.2"
-    - run: pip install --upgrade pip
-    - run: pip install poetry
-    - run: pip install pre-commit
-    - run: poetry install
-    - run: pre-commit install
-    - run: pre-commit run --all-files
+    - name: Configure python
+      run: pip install --upgrade pip && pip install poetry && poetry install && pip install pre-commit && pre-commit install
 
-  Startup-Check:
-    runs-on: ubuntu-latest 
+    - name: Run pre-commit
+      run: pre-commit run --all-files
+
+  run-tests:
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
     - uses: actions/setup-python@v2
       with:
         python-version: "3.12.2"
-    - run: pip install --upgrade pip
-    - run: pip install poetry
-    - run: pip install pre-commit
-    - run: poetry install
-    - run: pre-commit install
-    - run: mv ./.env-non-dev ./.env
-    - run: poetry run pytest -rfs -vv --color yes
+    - uses: actions/checkout@v2
+    - name: Configure python
+      run: pip install --upgrade pip && pip install poetry && poetry install && mv ./.env-non-dev ./.env
+
+    - name: Build app
+      run: docker-compose up -d --build
+
+    - name: Run tests
+      run: poetry run pytest -rfs -vv --color yes

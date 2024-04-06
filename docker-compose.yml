@@ -36,7 +36,7 @@ services:
       - .env
     container_name: AnalyzeMate_app
     ports:
-      - 8000:8000
+      - "${APP_PORT}:${APP_PORT}"
     depends_on:
       - db
       - redis
