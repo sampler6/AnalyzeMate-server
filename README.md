@@ -27,10 +27,16 @@ docker-compose up --build
 
 Приложение будет доступно по адресу localhost:8000(swagger: localhost:8000/docs), а бд localhost:5433
 
-## Тест на запуск приложения
+## Запуск тестов
 
 ```bash
-docker-compose -f docker-compose.test.yml up --build
+docker-compose up --build
+```
+
+После запуска приложения:
+
+```bash
+pytest -rfs -vv --color yes
 ```
 
 ## git commit

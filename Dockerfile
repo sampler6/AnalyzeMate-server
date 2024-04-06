@@ -5,6 +5,7 @@ RUN mkdir /src
 WORKDIR /src
 
 COPY poetry.lock* pyproject.toml ./
+COPY pytest.ini ./
 
 ARG INSTALL_DEV=false
 RUN pip install poetry

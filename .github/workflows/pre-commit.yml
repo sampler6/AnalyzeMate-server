@@ -20,13 +20,17 @@ jobs:
     runs-on: ubuntu-latest 
     steps:
     - uses: actions/checkout@v2
+    - name: Build app
+    - run: docker-compose up --build
+
     - uses: actions/setup-python@v2
       with:
         python-version: "3.12.2"
+    - name: Build python
     - run: pip install --upgrade pip
     - run: pip install poetry
-    - run: pip install pre-commit
     - run: poetry install
-    - run: pre-commit install
     - run: mv ./.env-non-dev ./.env
+
+    - name: Run tests
     - run: poetry run pytest -rfs -vv --color yes

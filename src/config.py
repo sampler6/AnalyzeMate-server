@@ -15,5 +15,8 @@ STOCK_MARKET = os.environ.get("STOCK_MARKET")
 REDIS_HOST = os.environ.get("REDIS_HOST")
 REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD")
 
+APP_HOST = os.environ.get("APP_HOST")
+APP_PORT = os.environ.get("APP_PORT")
+
 if not SECRET:
     raise Exception("SECRET is not defined")
