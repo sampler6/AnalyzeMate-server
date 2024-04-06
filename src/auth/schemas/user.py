@@ -10,7 +10,7 @@ class UserRead(schemas.BaseUser[int]):
     patronymic: str
     name: str
     surname: str
-    birthdate: datetime
+    birthdate: datetime = Field(default=datetime.now(timezone.utc))
     config: Optional[dict[str, Any]]
 
 
@@ -28,5 +28,5 @@ class UserUpdate(schemas.BaseUserUpdate):
     patronymic: Optional[str]
     name: Optional[str]
     surname: Optional[str]
-    birthdate: Optional[datetime]
+    birthdate: Optional[datetime] = Field(default=datetime.now(timezone.utc))
     config: Optional[dict[str, Any]]

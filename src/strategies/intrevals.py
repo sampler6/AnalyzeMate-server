@@ -16,3 +16,6 @@ interval_dict = {
     CandleInterval.CANDLE_INTERVAL_WEEK: timedelta(days=732),
     CandleInterval.CANDLE_INTERVAL_MONTH: timedelta(days=3660),
 }
+
+angle_inclination = 1 / 20
+size_trend_window = 10

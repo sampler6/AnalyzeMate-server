@@ -1,4 +1,4 @@
-__all__ = ("Securities", "PriceHistory")
+from securities.models.historic_candles import HistoricCandles
+from securities.models.security import Securities
 
-from securities.models.price_history import PriceHistory
-from securities.models.securities import Securities
+__all__ = ("Securities", "HistoricCandles")

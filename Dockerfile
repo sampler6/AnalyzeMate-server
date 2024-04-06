@@ -1,8 +1,8 @@
 FROM python:3.12.2
 
-RUN mkdir /AnalyzeMate
+RUN mkdir /src
 
-WORKDIR /AnalyzeMate
+WORKDIR /src
 
 COPY poetry.lock* pyproject.toml ./
 
@@ -14,4 +14,4 @@ RUN set -e \
 RUN echo Install dev packages: $INSTALL_DEV
 RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then pip install -r requirements.all.txt; else pip install -r requirements.main.txt; fi"
 
-COPY ./src/. /AnalyzeMate/.
+COPY ./src/. /src/.

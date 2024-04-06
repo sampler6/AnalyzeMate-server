@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from servises import Services
 from tinkoff.invest import CandleInterval
 
-from strategies.base import get_tinkoff_client
+from strategies.base import get_historic_candle_repository, get_securities_repository, get_tinkoff_client
 
 
 class Graphic:
@@ -38,11 +38,11 @@ class Graphic:
 
         # Отображение свечей для положительных и отрицательных дней
         for i in range(len(time)):
-            if close_prices[i] >= open_prices[i]:
+            if close_prices[i] > open_prices[i]:
                 plt.bar(time[i], close_prices[i] - open_prices[i], width, bottom=open_prices[i], color="green")
                 plt.bar(time[i], high_prices[i] - close_prices[i], width2, bottom=close_prices[i], color="green")
                 plt.bar(time[i], low_prices[i] - open_prices[i], width2, bottom=open_prices[i], color="green")
-            if close_prices[i] == open_prices[i]:
+            elif close_prices[i] == open_prices[i]:
                 plt.bar(time[i], close_prices[i] - open_prices[i], width, bottom=open_prices[i], color="black")
                 plt.bar(time[i], high_prices[i] - close_prices[i], width2, bottom=close_prices[i], color="black")
                 plt.bar(time[i], low_prices[i] - open_prices[i], width2, bottom=open_prices[i], color="black")
@@ -54,11 +54,12 @@ class Graphic:
         if indicators:
             for color, data in indicators.items():
                 history = data["history"][1:]  # пропускаем строку заголовков
-                time = [entry[0] for entry in history]
-                values = [entry[1] for entry in history]
+                timeInd = [entry[0] for entry in history]
+                valuesInd = [entry[1] for entry in history]
+
                 alpha = data.get("alpha", 1.0)  # Значение прозрачности по умолчанию - 1.0 (полностью непрозрачный)
                 plt.plot(
-                    time, values, color=color, alpha=alpha, label=color
+                    timeInd, valuesInd, color=color, alpha=alpha, label=color
                 )  # Построение линии с соответствующим цветом и прозрачностью
 
         # Отображение объема
@@ -104,8 +105,10 @@ class Graphic:
 async def main() -> None:
     # В API будем через Depends получать. Тут только так(
     client = await anext(get_tinkoff_client)
+    securities_repository = await anext(get_securities_repository)
+    historic_candles_repository = await anext(get_historic_candle_repository)
 
-    service = Services(client)
+    service = Services(client, securities_repository, historic_candles_repository)
 
     shares = await service.get_historic_candle(
         ticker="SBER",
