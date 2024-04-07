@@ -93,3 +93,9 @@ class TestAuth:
             "auth/login", json={"username": f"{self.faker.word()}@example.com", "password": self.password}
         )
         assert response.status_code == 422
+
+    async def test_auth_with_wrong_password(self, client_without_auth: AsyncClient) -> None:
+        response = await client_without_auth.post(
+            "auth/login", json={"username": self.email, "password": self.password + "wrong"}
+        )
+        assert response.status_code == 422
