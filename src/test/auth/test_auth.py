@@ -63,8 +63,8 @@ class TestAuth:
     async def test_register_with_short_password(self, client_without_auth: AsyncClient) -> None:
         # генерация пароля из меньше чем 8 символов, но с большими буквами и числом
         password = str(self.faker.word()).capitalize()
-        if len(password) >= 8:
-            password = password[0:6]
+        if len(password) >= 6:
+            password = password[0:5]
         password += "1"
 
         await self.register_with_validation_error(
@@ -94,6 +94,7 @@ class TestAuth:
         )
         assert response.status_code == 422
 
+    @pytest.mark.depends(on="test_register")
     async def test_auth_with_wrong_password(self, client_without_auth: AsyncClient) -> None:
         response = await client_without_auth.post(
             "auth/login", json={"username": self.email, "password": self.password + "wrong"}
