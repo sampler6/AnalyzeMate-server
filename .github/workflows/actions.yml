@@ -1,4 +1,4 @@
-name: Pre-commit
+name: Actions
 on: [pull_request, push]
 
 jobs:
