@@ -14,17 +14,30 @@ class TestAuth:
     while len(password) < 10:
         password += str(faker.random.randint(0, 9))
 
-    async def test_register(self, client_without_auth: AsyncClient) -> None:
+    base_register_data = {
+        "birthdate": "2024-04-06T16:09:20.161173Z",
+        "patronymic": "a",
+        "surname": "b",
+        "name": "f",
+        "balance": 0,
+        "config": {"test": "test"},
+    }
+
+    async def register_with_validation_error(
+        self, client_without_auth: AsyncClient, password: str, validation_error_text: str
+    ) -> None:
         data = {
-            "email": self.email,
-            "password": self.password,
-            "birthdate": "2024-04-06T16:09:20.161173Z",
-            "patronymic": "a",
-            "surname": "b",
-            "name": "f",
-            "balance": 0,
-            "config": {"test": "test"},
-        }
+            "email": f"{self.faker.word()}@example.com",
+            "password": password,
+        } | self.base_register_data
+        response = await client_without_auth.post("auth/register", json=data)
+        assert response.status_code == 422
+        response_data = response.json()
+        assert isinstance(response_data, dict)
+        assert response_data["detail"][0]["msg"] == "Assertion failed, " + validation_error_text
+
+    async def test_register(self, client_without_auth: AsyncClient) -> None:
+        data = {"email": self.email, "password": self.password} | self.base_register_data
         response = await client_without_auth.post("auth/register", json=data)
         assert response.status_code == 201, response.text
         response_data = response.json()
@@ -46,3 +59,37 @@ class TestAuth:
         response_data = response.json()
         assert isinstance(response_data, dict)
         assert UserRead.model_validate(response_data)
+
+    async def test_register_with_short_password(self, client_without_auth: AsyncClient) -> None:
+        # генерация пароля из меньше чем 8 символов, но с большими буквами и числом
+        password = str(self.faker.word()).capitalize()
+        if len(password) >= 8:
+            password = password[0:6]
+        password += "1"
+
+        await self.register_with_validation_error(
+            client_without_auth, password, "Password must have 8 or greater symbols"
+        )
+
+    async def test_register_with_password_without_upper_letter(self, client_without_auth: AsyncClient) -> None:
+        # генерация пароля из 8 символов с числом, но без больших букв
+        password = str(self.faker.word()).lower()
+        password += str(self.faker.random.randint(0, 9))
+        while len(password) < 8:
+            password += str(self.faker.random.randint(0, 9))
+
+        await self.register_with_validation_error(client_without_auth, password, "Password must have capital letter")
+
+    async def test_register_with_password_without_numeric_symbol(self, client_without_auth: AsyncClient) -> None:
+        # генерация пароля из 8 символов с большой буквой, но без числа
+        password = str(self.faker.word()).capitalize()
+        while len(password) < 8:
+            password += str(self.faker.word())
+
+        await self.register_with_validation_error(client_without_auth, password, "Password must have numeric symbol")
+
+    async def test_auth_with_wrong_credentials(self, client_without_auth: AsyncClient) -> None:
+        response = await client_without_auth.post(
+            "auth/login", json={"username": f"{self.faker.word()}@example.com", "password": self.password}
+        )
+        assert response.status_code == 422
