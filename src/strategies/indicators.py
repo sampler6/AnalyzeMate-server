@@ -14,6 +14,75 @@ from strategies.intrevals import angle_inclination, size_trend_window
 
 class Indicators:
     @staticmethod
+    def get_trend_predict(data: Dict[str, List[List[float]]]) -> List[List[float]]:
+        """
+        Даёт прогноз на основании тренда
+        :param data: dict
+            Словарь с данными, содержащий исторические цены.
+        :return: list
+            Параметры сделки.
+        """
+        history = data["history"][1:]  # пропускаем строку заголовков
+        time = [entry[0] for entry in history]
+        prices = [(entry[1] + entry[2]) / 2 for entry in history]
+        trends = []
+
+        for i in range(0, len(prices), size_trend_window):
+            # Индексы для текущего окна размером 10
+            indices = list(range(i, min(i + size_trend_window, len(prices))))
+            x = np.arange(len(indices))  # Создание массива индексов
+            y = np.array(prices[i : i + size_trend_window])  # Получение значений цен для текущего окна
+            A = np.vstack([x, np.ones(len(x))]).T  # Построение матрицы для аппроксимации
+            slope, intercept = np.linalg.lstsq(A, y, rcond=None)[0]  # Линейная аппроксимация
+            if slope > angle_inclination:
+                trends.append(
+                    [time[indices[0]], prices[indices[0]], "Up", slope, intercept]
+                )  # Сохранение коэффициента наклона
+            elif slope < -angle_inclination:
+                trends.append(
+                    [time[indices[0]], prices[indices[0]], "Down", slope, intercept]
+                )  # Сохранение коэффициента наклона
+            else:
+                trends.append(
+                    [time[indices[0]], prices[indices[0]], "Row", slope, intercept]
+                )  # Сохранение коэффициента наклона
+
+        flag_check_order = True
+        while flag_check_order:
+            flag_check_order = False
+            i = 1
+            while i < len(trends):
+                if trends[i - 1][2] == trends[i][2]:
+                    trends.remove(trends[i])
+                    flag_check_order = True
+                    continue
+                i += 1
+
+        number_wave = 0
+        array = []
+        past_i = 0
+        for i in range(len(time)):
+            if time[i] == trends[number_wave][0]:
+                array.append(i - past_i)
+                past_i = i
+                number_wave += 1
+                if number_wave == len(trends):
+                    break
+
+        average_floor = np.floor(np.mean(array))
+
+        # Вычисляем значение тренда, продлив последний элемент на average_floor
+        last_trend = trends[-1]
+        extended_trend_value = last_trend[1] + (average_floor * last_trend[3])  # Длина * наклон
+        stop_loss = history[-1][4] * 0.995
+        open = (history[-1][1] + history[-1][2]) / 2
+
+        result = [["open", "close", "take"]]  # type: ignore
+        result.append([open, stop_loss, extended_trend_value])  # type: ignore
+
+        return result  # type: ignore
+
+    @staticmethod
     def calculate_trend(data: Dict[str, List[List[float]]]) -> List[List[float]]:
         """
         Вычисляет тренд на основе временного ряда цен.
@@ -35,11 +104,17 @@ class Indicators:
             A = np.vstack([x, np.ones(len(x))]).T  # Построение матрицы для аппроксимации
             slope, intercept = np.linalg.lstsq(A, y, rcond=None)[0]  # Линейная аппроксимация
             if slope > angle_inclination:
-                trends.append([time[indices[0]], prices[indices[0]], "Up", slope])  # Сохранение коэффициента наклона
+                trends.append(
+                    [time[indices[0]], prices[indices[0]], "Up", slope, intercept]
+                )  # Сохранение коэффициента наклона
             elif slope < -angle_inclination:
-                trends.append([time[indices[0]], prices[indices[0]], "Down", slope])  # Сохранение коэффициента наклона
+                trends.append(
+                    [time[indices[0]], prices[indices[0]], "Down", slope, intercept]
+                )  # Сохранение коэффициента наклона
             else:
-                trends.append([time[indices[0]], prices[indices[0]], "Row", slope])  # Сохранение коэффициента наклона
+                trends.append(
+                    [time[indices[0]], prices[indices[0]], "Row", slope, intercept]
+                )  # Сохранение коэффициента наклона
 
         flag_check_order = True
         while flag_check_order:
@@ -136,6 +211,8 @@ async def main() -> None:
     }
 
     graphic.Graphic.print_graphic(shares, indicator)
+
+    a = Indicators.get_trend_predict(shares)
     print(a)
 
 
