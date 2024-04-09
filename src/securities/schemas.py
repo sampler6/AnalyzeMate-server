@@ -1,7 +1,12 @@
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Annotated, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, BeforeValidator, Field
+from tinkoff.invest import CandleInterval
+
+
+def timeframe_validator(timeframe: CandleInterval) -> int:
+    return timeframe.value
 
 
 class HistoricCandlesSchema(BaseModel):
@@ -11,6 +16,7 @@ class HistoricCandlesSchema(BaseModel):
     lowest: float
     volume: int
     ticker: str
+    timeframe: Annotated[int, BeforeValidator(timeframe_validator)]
     timestamp: datetime = Field(default=datetime.now(timezone.utc))
 
 
