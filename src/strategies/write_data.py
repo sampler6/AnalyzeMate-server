@@ -6,7 +6,7 @@ from list_shares import list_shares
 from servises import Services
 from tinkoff.invest import CandleInterval
 
-from strategies.base import get_historic_candle_repository, get_securities_repository, get_tinkoff_client
+from strategies.base import get_historic_candles_service, get_securities_service, get_tinkoff_client
 
 
 async def write_data(path: str, time: timedelta) -> None:
@@ -26,10 +26,10 @@ async def write_data(path: str, time: timedelta) -> None:
     ]
 
     client = await anext(get_tinkoff_client)
-    securities_repository = await anext(get_securities_repository)
-    historic_candles_repository = await anext(get_historic_candle_repository)
+    securities_service = await anext(get_securities_service)
+    historic_candles_service = await anext(get_historic_candles_service)
 
-    service = Services(client, securities_repository, historic_candles_repository)
+    service = Services(client, securities_service, historic_candles_service)
     array_data = []
     for i in range(len(list_shares)):
         for j in range(len(list_timeframe)):

@@ -1,8 +1,8 @@
 from db.base import get_async_session
 from fastapi import Depends
-from services.security import SecurityService
+from services.security import SecuritiesService
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-async def get_security_service(session: AsyncSession = Depends(get_async_session)) -> SecurityService:
-    return SecurityService(session=session)
+async def get_security_service(session: AsyncSession = Depends(get_async_session)) -> SecuritiesService:
+    return SecuritiesService(session=session)
