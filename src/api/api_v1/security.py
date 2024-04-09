@@ -5,14 +5,14 @@ from auth import User
 from auth.user_manager import current_active_user
 from fastapi import APIRouter, Depends
 from securities.schemas import SecurityOutSchema
-from services.security import SecurityService
+from services.security import SecuritiesService
 
 from api.deps import get_security_service
 
 router = APIRouter()
 logger = logging.getLogger("api")
 
-SecurityServiceDeps = Annotated[SecurityService, Depends(get_security_service)]
+SecurityServiceDeps = Annotated[SecuritiesService, Depends(get_security_service)]
 UserDeps = Annotated[User, Depends(current_active_user)]
 
 

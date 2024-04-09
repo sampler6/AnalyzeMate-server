@@ -3,24 +3,24 @@ import asyncio
 from securities.schemas import HistoricCandlesSchema, SecurityInSchema
 from tinkoff.invest import CandleInterval
 
-from strategies.base import get_historic_candle_repository, get_securities_repository
+from strategies.base import get_historic_candles_service, get_securities_service
 
 
 async def main() -> None:
     # записываем данные либо в словарик, либо через аргументы класса(пример у свечей)
     share = {"ticker": "SBER", "name": "Сбербанк"}
 
-    # создаем репозиторий
-    sec_repo = await anext(get_securities_repository)
+    # создаем сервис
+    sec_service = await anext(get_securities_service)
     # создаем схему
     share_schema = SecurityInSchema(**share)
     # вывод для примера
     print(share_schema)
     # сохраняем в бд
-    await sec_repo.save_security(share_schema)
+    await sec_service.save_security(share_schema)
 
     # Проверка на существование акции по тикеру
-    if await sec_repo.get_security_by_ticker(ticker="SBER") is None:
+    if await sec_service.get_security_by_ticker(ticker="SBER") is None:
         # Акции нет
         return
 
@@ -47,11 +47,11 @@ async def main() -> None:
     }
     hist2 = HistoricCandlesSchema(**d)
     print(hist2.model_dump())
-    hist_repo = await anext(get_historic_candle_repository)
+    hist_service = await anext(get_historic_candles_service)
     # сохранение одной свечи
-    await hist_repo.save_historic_candle(hist2)
+    await hist_service.save_historic_candle(hist2)
     # сохранения массива свеч
-    await hist_repo.save_historic_candles([hist, hist2])
+    await hist_service.save_historic_candles([hist, hist2])
 
 
 if __name__ == "__main__":
