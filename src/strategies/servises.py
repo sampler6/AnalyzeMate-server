@@ -76,7 +76,7 @@ class Services:
         dic["timeframe"] = interval.name
         m = [["time", "open", "close", "high", "low", "volume"]]
         current_date = from_date
-        c = 0
+        # c = 0
         response = None  # noqa
 
         while current_date + size_interval_days < to_date:
@@ -106,7 +106,7 @@ class Services:
 
             #   Счётчик для отображения количества запросов к API
             #   Возможно удаление без последствий
-            c += 1
+            # c += 1
 
         response = await self.client.market_data.get_candles(
             figi=share.figi, from_=current_date, to=to_date, interval=interval
@@ -151,7 +151,7 @@ async def main() -> None:
 
     shares = await service.get_historic_candle(
         ticker="SBER",
-        from_date=datetime.now(timezone.utc) - timedelta(days=1000),
+        from_date=datetime.now(timezone.utc) - timedelta(days=100),
         to_date=datetime.now(timezone.utc),
         interval=CandleInterval.CANDLE_INTERVAL_DAY,
         integer_representation_time=False,
