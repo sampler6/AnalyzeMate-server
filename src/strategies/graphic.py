@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from servises import Services
 from tinkoff.invest import CandleInterval
 
-from strategies.base import get_historic_candles_service, get_securities_service, get_tinkoff_client
+from strategies.base import get_tinkoff_client
 
 
 class Graphic:
@@ -105,10 +105,8 @@ class Graphic:
 async def main() -> None:
     # В API будем через Depends получать. Тут только так(
     client = await anext(get_tinkoff_client)
-    securities_service = await anext(get_securities_service)
-    historic_candles_service = await anext(get_historic_candles_service)
 
-    service = Services(client, securities_service, historic_candles_service)
+    service = Services(client)
 
     shares = await service.get_historic_candle(
         ticker="SBER",

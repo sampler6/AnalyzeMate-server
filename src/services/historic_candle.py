@@ -1,7 +1,7 @@
 from exceptions.securities import SecurityNotFoundError
 from repositories.historic_candles import HistoricCandlesRepository
 from repositories.security import SecuritiesRepository
-from securities.schemas import HistoricCandlesSchema
+from securities.schemas import HistoricCandlesOutSchema, HistoricCandlesSchema
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -10,7 +10,7 @@ class HistoricCandlesService:
         self.repository = HistoricCandlesRepository(session)
         self.securities_repository = SecuritiesRepository(session)
 
-    async def get_historic_candles_by_ticker(self, ticker: str) -> list[HistoricCandlesSchema]:
+    async def get_historic_candles_by_ticker(self, ticker: str) -> list[HistoricCandlesOutSchema]:
         if not await self.securities_repository.get_security_by_ticker(ticker):
             raise SecurityNotFoundError(ticker=ticker)
 
@@ -18,7 +18,7 @@ class HistoricCandlesService:
         validated_result = []
         for historic_candle in result:
             validated_result.append(
-                HistoricCandlesSchema(
+                HistoricCandlesOutSchema(
                     open=historic_candle.open,
                     close=historic_candle.close,
                     volume=historic_candle.volume,

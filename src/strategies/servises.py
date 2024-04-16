@@ -3,12 +3,10 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from config import STOCK_MARKET
-from services.historic_candle import HistoricCandlesService
-from services.security import SecuritiesService
 from tinkoff.invest import CandleInterval, InstrumentIdType, Share
 from tinkoff.invest.async_services import AsyncServices
 
-from strategies.base import get_historic_candles_service, get_securities_service, get_tinkoff_client
+from strategies.base import get_tinkoff_client
 from strategies.intrevals import interval_dict
 
 
@@ -17,12 +15,8 @@ class Services:
     def __init__(
         self,
         client: AsyncServices,
-        securities_repository: SecuritiesService,
-        historic_candles_repository: HistoricCandlesService,
     ) -> None:
         self.client = client
-        self.securities_service = securities_repository
-        self.historic_candles_service = historic_candles_repository
 
     async def get_shares(self, ticker: str) -> Share:
         """
@@ -144,10 +138,8 @@ async def main() -> None:
 
     # В API будем через Depends получать. Тут только так(
     client = await anext(get_tinkoff_client)
-    securities_service = await anext(get_securities_service)
-    historic_candles_service = await anext(get_historic_candles_service)
 
-    service = Services(client, securities_service, historic_candles_service)
+    service = Services(client)
 
     shares = await service.get_historic_candle(
         ticker="SBER",

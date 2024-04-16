@@ -16,10 +16,21 @@ class HistoricCandlesSchema(BaseModel):
     timestamp: datetime = Field(default=datetime.now(timezone.utc))
 
 
+class HistoricCandlesOutSchema(BaseModel):
+    open: float
+    close: float
+    highest: float
+    lowest: float
+    volume: int
+    ticker: str
+    timeframe: int
+    timestamp: datetime = Field(default=datetime.now(timezone.utc))
+
+
 class SecurityOutSchema(BaseModel):
     ticker: str
     name: str
-    historic_candles: Optional[list[HistoricCandlesSchema]] = Field(default=None)
+    historic_candles: Optional[list[HistoricCandlesOutSchema]] = Field(default=None)
 
 
 class SecurityInSchema(BaseModel):
