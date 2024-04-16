@@ -26,5 +26,5 @@ async def _get_securities_service_generator() -> AsyncGenerator[SecuritiesServic
 
 
 get_tinkoff_client = _get_async_tinkoff_api_client_generator()
-get_historic_candles_service = _get_historic_candles_service_generator()
-get_securities_service = _get_securities_service_generator()
+get_strategies_historic_candles_service = _get_historic_candles_service_generator()
+get_strategies_securities_service = _get_securities_service_generator()
