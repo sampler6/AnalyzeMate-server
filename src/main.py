@@ -1,3 +1,6 @@
+import logging
+from logging import getLogger
+
 from api.api import router as api_router
 from exceptions.base import exception_traceback_middleware
 from fastapi import FastAPI
@@ -11,6 +14,10 @@ origins = [
 app = FastAPI(
     Title="AnalyzeMate-server",
 )
+
+logger = getLogger("api")
+logging.basicConfig()
+logger.setLevel(logging.INFO)
 
 app.add_middleware(
     CORSMiddleware,  # noqa

@@ -8,6 +8,8 @@ services:
     user: postgres
     ports:
       - "5433:5432"
+    volumes:
+      - /path/to/local/dаta:/root/pg_data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready" ]
       interval: 10s
@@ -44,6 +46,38 @@ services:
     restart: always
     networks:
       Analyzemate-network:
+
+  worker:
+    build: .
+    command: bash -c "celery -A task.task worker -E --loglevel=info --pool=solo"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - app
+      - redis
+    env_file:
+      - .env
+    networks:
+      Analyzemate-network:
+
+  dashboard:
+    build: .
+    command: bash -c "while !</dev/tcp/db/5432 || !</dev/tcp/redis/6379; do sleep 1; done; celery --broker=redis://redis:6379/0 flower --port=5555"
+    ports:
+      - 5556:5555
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - app
+      - redis
+      - worker
+    env_file:
+      - .env
+    networks:
+      Analyzemate-network:
+
 
 networks:
   Analyzemate-network:
