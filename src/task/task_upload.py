@@ -7,9 +7,10 @@ from celery import shared_task
 from securities.schemas import HistoricCandlesSchema, SecurityInSchema
 from services.historic_candle import HistoricCandlesService
 from services.security import SecuritiesService
-from strategies.base import get_strategies_historic_candles_service, get_strategies_securities_service
 from strategies.supported_shares import supported_shares
 from tinkoff.invest import CandleInterval
+
+from task.base import get_strategies_historic_candles_service, get_strategies_securities_service
 
 logger = getLogger("api")
 
