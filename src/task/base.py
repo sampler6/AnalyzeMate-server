@@ -1,4 +1,3 @@
-from asyncio import shield
 from typing import AsyncGenerator
 
 from db.base import DATABASE_URL
@@ -12,15 +11,9 @@ async_session = async_sessionmaker(engine, expire_on_commit=False)
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
-    session = async_session()
-    try:
+    async with async_session() as session:
         yield session
         await session.commit()
-    except Exception:
-        await session.rollback()
-        raise
-    finally:
-        await shield(session.close())
 
 
 async def _get_historic_candles_service_generator() -> AsyncGenerator[HistoricCandlesService, None]:

@@ -1,4 +1,3 @@
-from asyncio import shield
 from typing import AsyncGenerator
 
 import redis.asyncio  # type: ignore
@@ -18,15 +17,9 @@ redis_db = redis.asyncio.from_url(f"redis://{REDIS_HOST}:6379", decode_responses
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
-    session = async_session()
-    try:
+    async with async_session() as session:
         yield session
         await session.commit()
-    except Exception:
-        await session.rollback()
-        raise
-    finally:
-        await shield(session.close())
 
 
 class Base(DeclarativeBase):
