@@ -9,7 +9,7 @@ COPY pytest.ini ./
 
 RUN pip install --upgrade pip
 RUN pip install poetry
-RUN set -e poetry export --without-hashes --format requirements.txt --output requirements.txt
+RUN poetry export --without-hashes --format requirements.txt --output requirements.txt
 RUN bash -c "pip install -r requirements.txt"
 
 COPY ./src/. /src/.
