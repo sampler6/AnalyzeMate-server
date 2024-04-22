@@ -26,7 +26,7 @@ jobs:
       run: pip install --upgrade pip && pip install poetry && poetry install && mv ./.env-non-dev ./.env
 
     - name: Build app
-      run: docker-compose up -d --build --wait
+      run: docker-compose up -d --build
 
     - name: Run tests
       run: poetry run pytest -rfs -vv --color yes
