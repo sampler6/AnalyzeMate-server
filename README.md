@@ -32,7 +32,7 @@ docker-compose up --build
 ## Запуск тестов
 
 ```bash
-docker-compose up -d --build; pytest -rfs -vv --color yes; docker-compose down
+docker-compose up -d --build --wait; pytest -rfs -vv --color yes; docker-compose down
 ```
 
 ## git commit

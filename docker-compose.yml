@@ -9,7 +9,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - /path/to/local/dаta:/root/pg_data
+      - analyzemate-pg:/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready" ]
       interval: 10s
@@ -24,8 +24,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - /path/to/local/dаta:/root/redis
-      - /path/to/local/redis.conf:/usr/local/etc/redis/redis.conf
+      - analyzemate-redis:/data
     env_file:
       - .env
     networks:
@@ -42,14 +41,14 @@ services:
     depends_on:
       - db
       - redis
-    command: bash -c "while !</dev/tcp/db/5432 || !</dev/tcp/redis/6379; do sleep 1; done; alembic upgrade head & gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:${APP_PORT}"
+    command: bash -c "while !</dev/tcp/db/5432 || !</dev/tcp/redis/6379; do sleep 1; done; alembic upgrade head && gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:${APP_PORT}"
     restart: always
     networks:
       Analyzemate-network:
 
   worker:
     build: .
-    command: bash -c "celery -A task.task worker -E --loglevel=info --pool=solo"
+    command: bash -c "while !</dev/tcp/app/${APP_PORT}; do sleep 3; done; celery -A task.task worker -E --loglevel=info --pool=solo"
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
@@ -58,12 +57,17 @@ services:
       - redis
     env_file:
       - .env
+    healthcheck:
+      test: bash -c "</dev/tcp/app/${APP_PORT}"
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       Analyzemate-network:
 
   dashboard:
     build: .
-    command: bash -c "while !</dev/tcp/db/5432 || !</dev/tcp/redis/6379; do sleep 1; done; celery --broker=redis://redis:6379/0 flower --port=5555"
+    command: bash -c "while !</dev/tcp/app/${APP_PORT}; do sleep 3; done; celery --broker=redis://redis:6379/0 flower --port=5555"
     ports:
       - 5556:5555
     environment:
@@ -78,6 +82,9 @@ services:
     networks:
       Analyzemate-network:
 
+volumes:
+  analyzemate-redis:
+  analyzemate-pg:
 
 networks:
   Analyzemate-network:
