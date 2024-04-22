@@ -1,43 +1,47 @@
+import asyncio
 import json
 from datetime import datetime
+from logging import getLogger
 
-from auth import User
+from celery import shared_task
 from securities.schemas import HistoricCandlesSchema, SecurityInSchema
 from services.historic_candle import HistoricCandlesService
 from services.security import SecuritiesService
+from strategies.supported_shares import supported_shares
 from tinkoff.invest import CandleInterval
 
-from strategies.supported_shares import supported_shares
+from task.base import get_strategies_historic_candles_service, get_strategies_securities_service
 
-with open("strategies/data_shares.json") as f:
-    data = json.load(f)["data"]
-
-candle_to_int = {
-    "CANDLE_INTERVAL_DAY": CandleInterval.CANDLE_INTERVAL_DAY,
-    "CANDLE_INTERVAL_4_HOUR": CandleInterval.CANDLE_INTERVAL_4_HOUR,
-    "CANDLE_INTERVAL_HOUR": CandleInterval.CANDLE_INTERVAL_HOUR,
-    "CANDLE_INTERVAL_30_MIN": CandleInterval.CANDLE_INTERVAL_30_MIN,
-}
+logger = getLogger("api")
 
 
-async def upload_data_from_files(
-    user: User, security_service: SecuritiesService, historic_candle_service: HistoricCandlesService
-) -> None:
+@shared_task(default_retry_delay=2 * 5, max_retries=2)
+def upload_data_from_files(**kwargs) -> None:  # type:ignore
     """Инициализация свечей из файла data_shares.json в базу данных"""
-    # if not user.is_superuser:
-    #     raise AccessDeniedException
+    logger.info("Начата процедура записи предзагруженных акций в базу данных")
 
-    global data
+    with open("strategies/data_shares.json") as f:
+        data = json.load(f)["data"]
+
+    security_service: SecuritiesService = asyncio.run(anext(get_strategies_securities_service))  # type:ignore
+    historic_candle_service: HistoricCandlesService = asyncio.run(anext(get_strategies_historic_candles_service))  # type:ignore
+
+    candle_to_int = {
+        "CANDLE_INTERVAL_DAY": CandleInterval.CANDLE_INTERVAL_DAY,
+        "CANDLE_INTERVAL_4_HOUR": CandleInterval.CANDLE_INTERVAL_4_HOUR,
+        "CANDLE_INTERVAL_HOUR": CandleInterval.CANDLE_INTERVAL_HOUR,
+        "CANDLE_INTERVAL_30_MIN": CandleInterval.CANDLE_INTERVAL_30_MIN,
+    }
 
     for security in data:
         try:
             # Пытаемся найти акцию по тикеру в бд. Если уже есть - не обрабатываем
-            await security_service.get_security_by_ticker(security["ticker"])
+            asyncio.run(security_service.get_security_by_ticker(security["ticker"]))
             continue
         except Exception:
             # Если ошибка, то значит акции в бд нет и нам надо добавить ее и историю цен
             security_schema = SecurityInSchema(ticker=security["ticker"], name=supported_shares[security["ticker"]])
-            await security_service.save_security(security_schema)
+            asyncio.run(security_service.save_security(security_schema))
             candles: list[HistoricCandlesSchema] = []
             for candle in security["history"][1:]:
                 candles.append(
@@ -53,4 +57,6 @@ async def upload_data_from_files(
                     )
                 )
 
-            await historic_candle_service.save_historic_candles(candles)
+            asyncio.run(historic_candle_service.save_historic_candles(candles))
+
+    logger.info("Акции загружены успешно")

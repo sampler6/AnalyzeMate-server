@@ -5,4 +5,6 @@ from portfolio.schemas import PortfolioInSchema
 
 class PortfolioRepository(BaseRepository):
     async def save_portfolio(self, portfolio: PortfolioInSchema, owner: int) -> Portfolio:
-        return await self.save(Portfolio(**portfolio.model_dump() | {"owner": owner}))
+        result = await self.save(Portfolio(**portfolio.model_dump() | {"owner": owner}))
+        await self.session.commit()
+        return result

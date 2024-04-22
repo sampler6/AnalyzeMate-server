@@ -8,6 +8,7 @@ COPY poetry.lock* pyproject.toml ./
 COPY pytest.ini ./
 
 ARG INSTALL_DEV=false
+RUN pip install --upgrade pip
 RUN pip install poetry
 RUN set -e \
     && poetry export --without-hashes --format requirements.txt --output requirements.main.txt \
