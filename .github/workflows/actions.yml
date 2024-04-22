@@ -29,7 +29,13 @@ jobs:
       run: docker-compose build
 
     - name: Run app
-      run: docker-compose up -d --wait
+      run: docker-compose up -d
+
+    - name: Wait Docker-Compose Healthy
+      uses: thegabriele97/dockercompose-health-action@v2024.04.19.0
+      with:
+        timeout: 60
+        workdir: src
 
     - name: Run tests
       run: poetry run pytest -rfs -vv --color yes
