@@ -126,7 +126,7 @@ class Services:
             else:
                 date = response.candles[i].time
 
-            m.append([date, float(op), float(close), float(high), float(low), float(volume)])  # type: ignore
+            m.append([str(date), float(op), float(close), float(high), float(low), float(volume)])  # type: ignore
 
         dic["history"] = m
         return dic

@@ -3,10 +3,10 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import matplotlib.pyplot as plt
-from servises import Services
 from tinkoff.invest import CandleInterval
 
 from strategies.base import get_historic_candle_repository, get_securities_repository, get_tinkoff_client
+from strategies.servises import Services
 
 
 class Graphic:
@@ -23,6 +23,7 @@ class Graphic:
         # Извлечение необходимых данных
         history = stock_data["history"][1:]  # пропускаем строку заголовков
         time = [entry[0] for entry in history]
+
         open_prices = [entry[1] for entry in history]
         close_prices = [entry[2] for entry in history]
         high_prices = [entry[3] for entry in history]
@@ -52,12 +53,12 @@ class Graphic:
                 plt.bar(time[i], low_prices[i] - close_prices[i], width2, bottom=close_prices[i], color="red")
 
         if indicators:
-            for color, data in indicators.items():
-                history = data["history"][1:]  # пропускаем строку заголовков
+            for color, indicator in indicators.items():
+                history = indicator["history"][1:]  # пропускаем строку заголовков
                 timeInd = [entry[0] for entry in history]
                 valuesInd = [entry[1] for entry in history]
 
-                alpha = data.get("alpha", 1.0)  # Значение прозрачности по умолчанию - 1.0 (полностью непрозрачный)
+                alpha = indicator.get("alpha", 1.0)  # Значение прозрачности по умолчанию - 1.0 (полностью непрозрачный)
                 plt.plot(
                     timeInd, valuesInd, color=color, alpha=alpha, label=color
                 )  # Построение линии с соответствующим цветом и прозрачностью
@@ -118,20 +119,21 @@ async def main() -> None:
         integer_representation_time=False,
     )
 
-    m = [["time", "value"]]
-    for i in range(1, len(shares["history"])):
-        t = shares["history"][i][0]
-        v = (shares["history"][i][1] + shares["history"][i][2]) / 2
-        m.append([t, v])
+    if shares is not None:
+        m = [["time", "value"]]
+        for i in range(1, len(shares["history"])):
+            t = shares["history"][i][0]
+            v = (shares["history"][i][1] + shares["history"][i][2]) / 2
+            m.append([t, v])
 
-    indicator = {
-        "black": {
-            "history": m,
-            "alpha": 0.5,  # Пример значения прозрачности (от 0 до 1)
+        indicator = {
+            "black": {
+                "history": m,
+                "alpha": 0.5,  # Пример значения прозрачности (от 0 до 1)
+            }
         }
-    }
 
-    Graphic.print_graphic(shares, indicator)
+        Graphic.print_graphic(shares, indicator)
 
 
 if __name__ == "__main__":

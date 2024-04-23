@@ -1,7 +1,6 @@
 import asyncio
 
 from securities.schemas import HistoricCandlesSchema, SecurityInSchema
-
 from strategies.base import get_historic_candle_repository, get_securities_repository
 
 

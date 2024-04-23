@@ -3,10 +3,10 @@ import json
 from datetime import datetime, timedelta, timezone
 
 from list_shares import list_shares
-from servises import Services
 from tinkoff.invest import CandleInterval
 
 from strategies.base import get_historic_candle_repository, get_securities_repository, get_tinkoff_client
+from strategies.servises import Services
 
 
 async def write_data(path: str, time: timedelta) -> None:
