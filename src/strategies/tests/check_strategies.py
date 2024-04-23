@@ -241,6 +241,7 @@ if __name__ == "__main__":
         CandleInterval.CANDLE_INTERVAL_5_MIN,
     ]
     result_test = []
+
     for i in range(len(list_timeframe)):
         [average_sum, average_procent] = asyncio.run(Te.run_interval_time(str(list_timeframe[i].name)))
         result_test.append({"average_sum": average_sum, "average_procent": average_procent})
