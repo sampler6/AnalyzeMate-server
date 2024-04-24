@@ -36,7 +36,7 @@ async def write_data(path: str, time: timedelta) -> None:
     log.debug("Started to get data")
     service = Services(client)
     array_data = []
-    list_shares = supported_shares.keys()
+    list_shares = [x for x in supported_shares]
 
     for i in range(len(list_shares)):
         for j in range(len(list_timeframe)):

@@ -10,7 +10,6 @@ from strategies.base import get_tinkoff_client
 from strategies.intrevals import interval_dict
 
 
-# TODO: убрать все print и подумать, как уменьшить число запросов к бирже
 class Services:
     def __init__(
         self,
@@ -63,7 +62,7 @@ class Services:
         """
         size_interval_days = interval_dict[interval]
 
-        share = await self.get_shares("SBER")
+        share = await self.get_shares(ticker)
         dic = dict()
         dic["figi"] = share.figi
         dic["ticker"] = ticker

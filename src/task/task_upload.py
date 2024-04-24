@@ -3,6 +3,7 @@ import json
 from logging import getLogger
 
 from celery import shared_task
+from exceptions.securities import SecurityNotFoundError
 from securities.schemas import HistoricCandlesSchema, SecurityInSchema
 from services.historic_candle import HistoricCandlesService
 from services.security import SecuritiesService
@@ -37,7 +38,7 @@ def upload_data_from_files(**kwargs) -> None:  # type:ignore
             # Пытаемся найти акцию по тикеру в бд. Если уже есть - не обрабатываем
             asyncio.run(security_service.get_security_by_ticker(security["ticker"]))
             continue
-        except Exception:
+        except SecurityNotFoundError:
             # Если ошибка, то значит акции в бд нет и нам надо добавить ее и историю цен
             security_schema = SecurityInSchema(ticker=security["ticker"], name=supported_shares[security["ticker"]])
             asyncio.run(security_service.save_security(security_schema))
