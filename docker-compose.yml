@@ -9,7 +9,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - analyzemate-pg:/data
+      - analyzemate-pg:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready" ]
       interval: 10s
@@ -24,7 +24,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - analyzemate-redis:/data
+      - analyzemate-redis:/var/lib/redis/data
     env_file:
       - .env
     networks:

@@ -1,6 +1,5 @@
 import asyncio
 import json
-from datetime import datetime
 from logging import getLogger
 
 from celery import shared_task
@@ -53,7 +52,7 @@ def upload_data_from_files(**kwargs) -> None:  # type:ignore
                         lowest=candle[4],
                         volume=candle[5],
                         timeframe=candle_to_int[security["timeframe"]],
-                        timestamp=datetime.fromtimestamp(candle[0] / 1000),
+                        timestamp=candle[0],
                     )
                 )
 

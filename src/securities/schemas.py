@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from typing import Optional
 
 from pydantic import BaseModel, Field
@@ -13,7 +12,7 @@ class HistoricCandlesSchema(BaseModel):
     volume: int
     ticker: str
     timeframe: CandleInterval
-    timestamp: datetime = Field(default=datetime.now(timezone.utc))
+    timestamp: float
 
 
 class HistoricCandlesOutSchema(BaseModel):
@@ -24,7 +23,7 @@ class HistoricCandlesOutSchema(BaseModel):
     volume: int
     ticker: str
     timeframe: int
-    timestamp: datetime = Field(default=datetime.now(timezone.utc))
+    timestamp: float
 
 
 class SecurityOutSchema(BaseModel):
