@@ -1,7 +1,5 @@
-from datetime import datetime
-
 from db.base import Base
-from sqlalchemy import DateTime, ForeignKey, Integer, func
+from sqlalchemy import ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column
 
 
@@ -16,4 +14,4 @@ class HistoricCandles(Base):
     volume: Mapped[int]
     ticker: Mapped[str] = mapped_column(ForeignKey("securities.ticker"))
     timeframe: Mapped[int]
-    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    timestamp: Mapped[float]
