@@ -26,9 +26,16 @@ class HistoricCandlesOutSchema(BaseModel):
     timestamp: float
 
 
+class SecurityShortOutSchema(BaseModel):
+    ticker: str
+    name: str
+    price: Optional[float]
+
+
 class SecurityOutSchema(BaseModel):
     ticker: str
     name: str
+    price: float
     historic_candles: Optional[list[HistoricCandlesOutSchema]] = Field(default=None)
 
 

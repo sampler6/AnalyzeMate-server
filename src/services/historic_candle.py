@@ -10,11 +10,11 @@ class HistoricCandlesService:
         self.repository = HistoricCandlesRepository(session)
         self.securities_repository = SecuritiesRepository(session)
 
-    async def get_historic_candles_by_ticker(self, ticker: str) -> list[HistoricCandlesOutSchema]:
+    async def get_historic_candles_by_ticker(self, ticker: str, timeframe: int) -> list[HistoricCandlesOutSchema]:
         if not await self.securities_repository.get_security_by_ticker(ticker):
             raise SecurityNotFoundError(ticker=ticker)
 
-        result = await self.repository.get_historic_candles_by_ticker(ticker)
+        result = await self.repository.get_historic_candles_by_ticker(ticker, timeframe)
         validated_result = []
         for historic_candle in result:
             validated_result.append(
