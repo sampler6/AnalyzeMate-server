@@ -4,6 +4,7 @@ from datetime import datetime
 from logging import getLogger
 
 from celery import shared_task
+from config import LOAD_SECURITIES
 from securities.models import Securities
 from services.historic_candle import HistoricCandlesService
 from services.security import SecuritiesService
@@ -19,6 +20,10 @@ logger = getLogger("api")
 def upload_data_from_files(**kwargs) -> None:  # type:ignore
     """Инициализация свечей из файла data_shares.json в базу данных"""
     logger.info("Начата процедура записи предзагруженных акций в базу данных")
+
+    if not LOAD_SECURITIES:
+        logger.info("Запись предзагруженных акций в базу данных отменена из-за флага LOAD_SECURITIES")
+        return
 
     with open("strategies/data_shares.json") as f:
         data = json.load(f)["data"]
@@ -75,7 +80,13 @@ def process_new_data(
     for security in data:
         if security["ticker"] not in existing_tickers_in_db:
             # Если тикера нет, добавляем
-            security_to_append.append(Securities(ticker=security["ticker"], name=supported_shares[security["ticker"]]))
+            security_to_append.append(
+                Securities(
+                    ticker=security["ticker"],
+                    name=supported_shares[security["ticker"]],
+                    price=security["history"][len(security["history"]) - 1][2],
+                )
+            )
             existing_tickers_in_db.append(security["ticker"])
 
         for candle in security["history"][1:]:

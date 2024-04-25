@@ -29,7 +29,7 @@ class SecuritiesService:
             SecurityShortOutSchema(
                 ticker=security.ticker,
                 name=security.name,
-                price=await self.historic_candles_service.repository.get_price_by_ticker(security.ticker),
+                price=security.price,
             )
             for security in await self.repository.get_all_securities()
         ]
@@ -45,7 +45,7 @@ class SecuritiesService:
                 SecurityOutSchema(
                     ticker=security.ticker,
                     name=security.name,
-                    price=await self.historic_candles_service.repository.get_price_by_ticker(security.ticker),
+                    price=security.price,
                     historic_candles=await self.historic_candles_service.get_historic_candles_by_ticker_and_timeframe(
                         security.ticker, timeframe
                     ),
@@ -54,11 +54,7 @@ class SecuritiesService:
             ]
         else:
             result = [
-                SecurityOutSchema(
-                    ticker=security.ticker,
-                    name=security.name,
-                    price=await self.historic_candles_service.repository.get_price_by_ticker(security.ticker),
-                )
+                SecurityOutSchema(ticker=security.ticker, name=security.name, price=security.price)
                 for security in await self.repository.get_securities_by_tickers(tickers)
             ]
         return result

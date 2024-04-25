@@ -13,5 +13,5 @@ class HistoricCandles(Base):
     lowest: Mapped[float]
     volume: Mapped[int]
     ticker: Mapped[str] = mapped_column(ForeignKey("securities.ticker"))
-    timeframe: Mapped[int]
-    timestamp: Mapped[float]
+    timeframe: Mapped[int] = mapped_column(primary_key=True)
+    timestamp: Mapped[float] = mapped_column(primary_key=True)

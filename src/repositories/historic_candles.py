@@ -4,7 +4,7 @@ from typing import Iterable
 from db.base_repository import BaseRepository
 from securities.models import HistoricCandles
 from securities.schemas import HistoricCandlesSchema
-from sqlalchemy import and_, desc, insert, select
+from sqlalchemy import and_, insert, select
 
 logger = logging.getLogger("api")
 
@@ -33,13 +33,6 @@ class HistoricCandlesRepository(BaseRepository):
 
         await self.save_all(historic_candles_db)
         await self.session.commit()
-
-    async def get_price_by_ticker(self, ticker: str) -> float | None:
-        statement = (
-            select(HistoricCandles).where(HistoricCandles.ticker == ticker).order_by(desc(HistoricCandles.timestamp))
-        )
-        result = (await self.session.execute(statement)).scalars().first()
-        return result.close if result else None
 
     async def insert_bulk(self, historic_candles: list[dict]) -> None:
         """Запись большого числа свечей с помощью insert bulk mode sqlalchemy"""
