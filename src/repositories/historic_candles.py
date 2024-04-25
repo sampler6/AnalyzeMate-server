@@ -4,13 +4,15 @@ from typing import Iterable
 from db.base_repository import BaseRepository
 from securities.models import HistoricCandles
 from securities.schemas import HistoricCandlesSchema
-from sqlalchemy import and_, desc, select
+from sqlalchemy import and_, desc, insert, select
 
 logger = logging.getLogger("api")
 
 
 class HistoricCandlesRepository(BaseRepository):
-    async def get_historic_candles_by_ticker(self, ticker: str, timeframe: int) -> Iterable[HistoricCandles]:
+    async def get_historic_candles_by_ticker_and_timeframe(
+        self, ticker: str, timeframe: int
+    ) -> Iterable[HistoricCandles]:
         statement = select(HistoricCandles).where(
             and_(HistoricCandles.ticker == ticker, HistoricCandles.timeframe == timeframe)
         )
@@ -38,3 +40,12 @@ class HistoricCandlesRepository(BaseRepository):
         )
         result = (await self.session.execute(statement)).scalars().first()
         return result.close if result else None
+
+    async def insert_bulk(self, historic_candles: list[dict]) -> None:
+        """Запись большого числа свечей с помощью insert bulk mode sqlalchemy"""
+        stmt = insert(HistoricCandles)
+        await self.session.execute(stmt, historic_candles)
+        await self.session.commit()
+
+    async def get_all_historic_candles(self) -> Iterable[HistoricCandles]:
+        return await self.all(select(HistoricCandles))

@@ -46,7 +46,7 @@ class SecuritiesService:
                     ticker=security.ticker,
                     name=security.name,
                     price=await self.historic_candles_service.repository.get_price_by_ticker(security.ticker),
-                    historic_candles=await self.historic_candles_service.get_historic_candles_by_ticker(
+                    historic_candles=await self.historic_candles_service.get_historic_candles_by_ticker_and_timeframe(
                         security.ticker, timeframe
                     ),
                 )
