@@ -43,7 +43,7 @@ async def write_data(path: str, time: timedelta) -> None:
             log.debug("Request %s data", list_shares[i])
             shares = await service.get_historic_candle(
                 ticker=list_shares[i],
-                from_date=datetime.now(timezone.utc) - time,
+                from_date=(datetime.now(timezone.utc) - time),
                 to_date=datetime.now(timezone.utc),
                 interval=list_timeframe[j],
                 integer_representation_time=True,
@@ -59,4 +59,4 @@ async def write_data(path: str, time: timedelta) -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(write_data("data_shares.json", timedelta(days=365)))
+    asyncio.run(write_data("data_shares.json", timedelta(days=90)))
