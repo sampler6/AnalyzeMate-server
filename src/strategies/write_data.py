@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+from asyncio import sleep
 from datetime import datetime, timedelta, timezone
 from logging import getLogger
 
@@ -41,6 +42,7 @@ async def write_data(path: str, time: timedelta) -> None:
     for i in range(len(list_shares)):
         for j in range(len(list_timeframe)):
             log.debug("Request %s data", list_shares[i])
+            await sleep(0.05)
             shares = await service.get_historic_candle(
                 ticker=list_shares[i],
                 from_date=(datetime.now(timezone.utc) - time),
