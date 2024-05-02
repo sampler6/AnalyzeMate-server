@@ -29,6 +29,7 @@ celery = "^5.3.6"
 flower = "^2.0.1"
 asyncpg = "^0.29.0"
 psycopg = {extras = ["binaries", "pool"], version = "^3.1.18"}
+pyfcm = "^1.5.4"
 
 [tool.poetry.dev-dependencies]
 mypy = "^1.9.0"

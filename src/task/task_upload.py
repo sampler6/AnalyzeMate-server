@@ -3,7 +3,6 @@ import json
 from datetime import datetime
 from logging import getLogger
 
-from celery import shared_task
 from config import LOAD_SECURITIES
 from securities.models import Securities
 from services.historic_candle import HistoricCandlesService
@@ -12,11 +11,12 @@ from strategies.supported_shares import supported_shares
 from tinkoff.invest import CandleInterval
 
 from task.base import get_strategies_historic_candles_service, get_strategies_securities_service
+from task.task import app_celery
 
 logger = getLogger("api")
 
 
-@shared_task(default_retry_delay=2 * 5, max_retries=2)
+@app_celery.task(default_retry_delay=2 * 5, max_retries=2)
 def upload_data_from_files(**kwargs) -> None:  # type:ignore
     """Инициализация свечей из файла data_shares.json в базу данных"""
     logger.info("Начата процедура записи предзагруженных акций в базу данных")
