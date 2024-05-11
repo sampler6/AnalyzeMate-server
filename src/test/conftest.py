@@ -1,3 +1,4 @@
+import time
 from logging import getLogger
 
 import pytest_asyncio
@@ -8,6 +9,8 @@ is_init = False
 token = ""
 
 logger = getLogger("test")
+# Ожидание завершение задач celery на инициализацию
+time.sleep(5)
 
 
 async def init() -> None:

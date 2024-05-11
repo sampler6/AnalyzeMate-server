@@ -3,10 +3,10 @@ from httpx import AsyncClient
 
 
 @pytest.mark.parametrize(
-    "balance",
+    "balance, status_code",
     [
-        (1000, 201),
-        ("Vasya", 400),
+        (1000, 200),
+        ("Vasya", 422),
     ],
 )
 async def test_create_portfolio(
