@@ -9,3 +9,8 @@ class PortfolioOutSchema(BaseModel):
     id: int
     balance: float
     owner: int
+
+
+class PortfolioBalanceSchema(BaseModel):
+    portfolio_balance: float
+    user_balance: float
