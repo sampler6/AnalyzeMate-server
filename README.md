@@ -29,18 +29,18 @@ docker-compose up --build
 
 Приложение будет доступно по адресу localhost:8000(swagger: localhost:8000/docs), а бд localhost:5433
 
-## Запуск тестов
+# Запуск тестов
 
 ```bash
 docker-compose up -d --build --wait; pytest -rfs -vv --color yes; docker-compose down
 ```
 
-## git commit
+# git commit
 В проекте используется pre-commit. Каждый коммит проходит проверку линтерами.
 Линтеры запускаются автоматически при коммите. Если хотите запустить их сами:
 - `pre-commit run --all-files`
 
-## alembic
+# alembic
 Для работы с alembic необходимо перейти в папку src:
 
 ```bash
