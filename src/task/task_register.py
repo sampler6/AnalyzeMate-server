@@ -2,18 +2,18 @@ import asyncio
 from logging import getLogger
 
 from auth import User
-from celery import shared_task
 from config import APP_PORT
 from httpx import Client
 from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from task.base import engine
+from task.task import app_celery
 
 logger = getLogger("api")
 
 
-@shared_task(default_retry_delay=2 * 5, max_retries=2)
+@app_celery.task(default_retry_delay=2 * 5, max_retries=2)
 def register_dev_accounts() -> None:
     data = {
         "birthdate": "2024-04-06T16:09:20.161173Z",

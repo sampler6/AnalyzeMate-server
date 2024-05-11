@@ -40,18 +40,18 @@ services:
     depends_on:
       - db
       - redis
+      - worker
     command: bash -c "while !</dev/tcp/db/5432 || !</dev/tcp/redis/6379; do sleep 1; done; alembic upgrade head && gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:${APP_PORT}"
     networks:
       Analyzemate-network:
 
   worker:
     build: .
-    command: bash -c "while !</dev/tcp/app/${APP_PORT}; do sleep 3; done; celery -A task.task worker -E --loglevel=info --pool=solo"
+    command: celery -A task.task worker -E --loglevel=info --pool=solo
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
-      - app
       - redis
     env_file:
       - .env
@@ -65,14 +65,13 @@ services:
 
   dashboard:
     build: .
-    command: bash -c "while !</dev/tcp/app/${APP_PORT}; do sleep 3; done; celery --broker=redis://redis:6379/0 flower --port=5555"
+    command: celery --broker=redis://redis:6379/0 flower --port=5555
     ports:
       - 5556:5555
     environment:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
-      - app
       - redis
       - worker
     env_file:

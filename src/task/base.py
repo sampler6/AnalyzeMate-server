@@ -1,6 +1,7 @@
 from typing import AsyncGenerator
 
-from config import DB_HOST, DB_NAME, DB_PASS, DB_PORT, DB_USER
+import redis  # type: ignore
+from config import DB_HOST, DB_NAME, DB_PASS, DB_PORT, DB_USER, REDIS_HOST
 from services.historic_candle import HistoricCandlesService
 from services.security import SecuritiesService
 from sqlalchemy import NullPool
@@ -10,6 +11,7 @@ DATABASE_URL = f"postgresql+psycopg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{D
 
 engine = create_async_engine(DATABASE_URL, poolclass=NullPool)
 async_session = async_sessionmaker(engine, expire_on_commit=False)
+redis_sync = redis.Redis.from_url(f"redis://{REDIS_HOST}:6379")
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
