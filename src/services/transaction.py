@@ -75,9 +75,9 @@ class TransactionsService:
         await self.repository.create_transaction(transaction_create)
 
         if transaction_type == TransactionType.Sell:
-            delta = transaction.volume * security.price
+            delta = round(transaction.volume * security.price, 2)
         else:
-            delta = -transaction.volume * security.price
+            delta = round(-transaction.volume * security.price, 2)
 
         await self.portfolio_repository.update_portfolio_balance(portfolio=portfolio, balance=portfolio.balance + delta)
         await self.user_repository.add_delta_to_user_balance(user_id=portfolio.owner, delta=delta)
