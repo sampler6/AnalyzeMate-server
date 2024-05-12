@@ -23,7 +23,3 @@ interval_to_timedelta = {
     CandleInterval.CANDLE_INTERVAL_4_HOUR: timedelta(hours=4),
     CandleInterval.CANDLE_INTERVAL_DAY: timedelta(days=1),
 }
-
-
-angle_inclination = 1 / 20
-size_trend_window = 10

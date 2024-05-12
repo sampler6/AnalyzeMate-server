@@ -2,8 +2,8 @@ from typing import AsyncGenerator
 
 from config import TOKEN
 from db.base import async_session
-from services.historic_candle import HistoricCandlesService
-from services.security import SecuritiesService
+from repositories.historic_candles import HistoricCandlesRepository
+from repositories.security import SecuritiesRepository
 from tinkoff.invest import AsyncClient
 from tinkoff.invest.async_services import AsyncServices
 
@@ -15,16 +15,14 @@ async def _get_async_tinkoff_api_client_generator() -> AsyncGenerator[AsyncServi
         yield client
 
 
-async def _get_historic_candles_service_generator() -> AsyncGenerator[HistoricCandlesService, None]:
+async def _get_historic_candle_repository_generator() -> AsyncGenerator[HistoricCandlesRepository, None]:
     async with async_session() as session:
-        yield HistoricCandlesService(session)
+        yield HistoricCandlesRepository(session)
 
 
-async def _get_securities_service_generator() -> AsyncGenerator[SecuritiesService, None]:
+async def _get_securities_repository_generator() -> AsyncGenerator[SecuritiesRepository, None]:
     async with async_session() as session:
-        yield SecuritiesService(session)
+        yield SecuritiesRepository(session)
 
 
 get_tinkoff_client = _get_async_tinkoff_api_client_generator()
-get_strategies_historic_candles_service = _get_historic_candles_service_generator()
-get_strategies_securities_service = _get_securities_service_generator()
