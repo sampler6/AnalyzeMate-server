@@ -1,6 +1,6 @@
 from typing import Any
 
-from db import Base
+from db.base import Base
 from sqlalchemy.dialects.mssql import JSON
 from sqlalchemy.orm import Mapped, mapped_column
 
