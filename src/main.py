@@ -8,7 +8,7 @@ from starlette.middleware.cors import CORSMiddleware
 from task import register_dev_accounts, upload_data_from_files
 
 origins = [
-    "http://localhost:8000",
+    "*",
 ]
 
 logger = getLogger("api")

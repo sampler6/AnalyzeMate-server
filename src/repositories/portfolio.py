@@ -9,15 +9,14 @@ from sqlalchemy import delete, select
 class PortfolioRepository(BaseRepository):
     async def save_portfolio(self, portfolio: PortfolioInSchema, owner: int) -> Portfolio:
         result = await self.save(Portfolio(**portfolio.model_dump() | {"owner": owner}))
-        await self.session.commit()
         return result
 
     async def get_portfolio_by_id(self, portfolio_id: int) -> Portfolio | None:
         statement = select(Portfolio).where(Portfolio.id == portfolio_id)
         return await self.one_or_none(statement)
 
-    async def get_portfolios_by_owner_id(self, owner_id: int) -> Iterable[Portfolio]:
-        statement = select(Portfolio).filter(Portfolio.owner == owner_id)
+    async def get_portfolios_ids_by_owner_id(self, owner_id: int) -> Iterable[int]:
+        statement = select(Portfolio.id).where(Portfolio.owner == owner_id)
         return await self.all(statement)
 
     async def delete_portfolio_by_id(self, portfolio_id: int) -> None:

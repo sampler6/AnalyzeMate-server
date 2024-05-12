@@ -32,6 +32,14 @@ class SecurityShortOutSchema(BaseModel):
     price: Optional[float]
 
 
+class SecurityWithVolumeAndPriceOutSchema(BaseModel):
+    ticker: str
+    name: str
+    price: Optional[float]
+    volume: Optional[int]
+    delta_price: Optional[float]
+
+
 class SecurityOutSchema(BaseModel):
     ticker: str
     name: str

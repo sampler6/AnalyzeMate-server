@@ -3,6 +3,7 @@ from fastapi import Depends
 from services.historic_candle import HistoricCandlesService
 from services.portfolio import PortfolioService
 from services.security import SecuritiesService
+from services.transaction import TransactionsService
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -16,3 +17,7 @@ async def get_portfolio_service(session: AsyncSession = Depends(get_async_sessio
 
 async def get_historic_candles_service(session: AsyncSession = Depends(get_async_session)) -> HistoricCandlesService:
     return HistoricCandlesService(session)
+
+
+async def get_transactions_service(session: AsyncSession = Depends(get_async_session)) -> TransactionsService:
+    return TransactionsService(session)
