@@ -7,9 +7,9 @@ from typing import Any
 
 from tinkoff.invest import CandleInterval
 
-from strategies.base import get_historic_candle_repository, get_securities_repository, get_tinkoff_client
-from strategies.list_shares import list_shares
+from strategies.base import get_tinkoff_client
 from strategies.servises import Services
+from strategies.supported_shares import supported_shares
 
 
 async def write_data() -> None:
@@ -33,10 +33,9 @@ async def write_data() -> None:
     ]
 
     client = await anext(get_tinkoff_client)
-    securities_repository = await anext(get_securities_repository)
-    historic_candles_repository = await anext(get_historic_candle_repository)
+    list_shares = list(supported_shares.keys())
 
-    service = Services(client, securities_repository, historic_candles_repository)
+    service = Services(client)
     for i in range(len(list_timeframe)):
         for j in range(len(list_shares)):
             share = {}

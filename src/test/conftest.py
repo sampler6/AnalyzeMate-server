@@ -1,3 +1,4 @@
+import time
 from logging import getLogger
 
 import pytest_asyncio
@@ -8,24 +9,14 @@ is_init = False
 token = ""
 
 logger = getLogger("test")
+# Ожидание завершение задач celery на инициализацию
+time.sleep(5)
 
 
 async def init() -> None:
     global token
     assert token == ""
-    data = {
-        "email": "test@example.com",
-        "password": "Test12345",
-        "birthdate": "2024-04-06T16:09:20.161173Z",
-        "patronymic": "test",
-        "surname": "client",
-        "name": "aaa",
-        "balance": 0,
-        "config": {"test": "test"},
-    }
     async with AsyncClient(base_url=f"http://{APP_HOST}:{APP_PORT}/") as test_client:
-        response = await test_client.post("auth/register", json=data)
-        assert response.status_code not in ["200", "400"], "Cannot register test_user"
         response = await test_client.post("auth/login", data={"username": "test@example.com", "password": "Test12345"})
         assert response.status_code == 200
         token = response.json()["access_token"]

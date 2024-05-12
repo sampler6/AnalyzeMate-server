@@ -39,7 +39,6 @@ class UserCreate(schemas.BaseUserCreate):
 
 
 class UserUpdate(schemas.BaseUserUpdate):
-    balance: Optional[float]
     patronymic: Optional[str]
     name: Optional[str]
     surname: Optional[str]

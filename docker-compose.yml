@@ -2,12 +2,13 @@ services:
   db:
     image: postgres:16.1
     container_name: db
-    restart: always
     env_file:
       - .env
     user: postgres
     ports:
       - "5433:5432"
+    volumes:
+      - analyzemate-pg:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready" ]
       interval: 10s
@@ -22,8 +23,7 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - /path/to/local/dаta:/root/redis
-      - /path/to/local/redis.conf:/usr/local/etc/redis/redis.conf
+      - analyzemate-redis:/data
     env_file:
       - .env
     networks:
@@ -40,10 +40,48 @@ services:
     depends_on:
       - db
       - redis
-    command: bash -c "while !</dev/tcp/db/5432 && !</dev/tcp/redis/6379; do sleep 1; done; alembic upgrade head & gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000"
-    restart: always
+      - worker
+    command: bash -c "while !</dev/tcp/db/5432 || !</dev/tcp/redis/6379; do sleep 1; done; alembic upgrade head && gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:${APP_PORT}"
     networks:
       Analyzemate-network:
+
+  worker:
+    build: .
+    command: celery -A task.task worker -E --loglevel=info --pool=solo
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    healthcheck:
+      test: bash -c "</dev/tcp/app/${APP_PORT}"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      Analyzemate-network:
+
+  dashboard:
+    build: .
+    command: celery --broker=redis://redis:6379/0 flower --port=5555
+    ports:
+      - 5556:5555
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+      - worker
+    env_file:
+      - .env
+    networks:
+      Analyzemate-network:
+
+volumes:
+  analyzemate-redis:
+  analyzemate-pg:
 
 networks:
   Analyzemate-network:

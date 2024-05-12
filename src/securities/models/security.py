@@ -8,3 +8,4 @@ class Securities(Base):
 
     ticker: Mapped[str] = mapped_column(String, primary_key=True)
     name: Mapped[str]
+    price: Mapped[float]

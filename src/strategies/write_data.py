@@ -1,12 +1,19 @@
 import asyncio
 import json
+import logging
+from asyncio import sleep
 from datetime import datetime, timedelta, timezone
+from logging import getLogger
 
-from list_shares import list_shares
+from servises import Services
+from supported_shares import supported_shares
 from tinkoff.invest import CandleInterval
 
-from strategies.base import get_historic_candle_repository, get_securities_repository, get_tinkoff_client
-from strategies.servises import Services
+from strategies.base import get_tinkoff_client
+
+logging.basicConfig()
+log = getLogger("tinkoff_client")
+log.setLevel(logging.DEBUG)
 
 
 async def write_data(path: str, time: timedelta) -> None:
@@ -26,16 +33,19 @@ async def write_data(path: str, time: timedelta) -> None:
     ]
 
     client = await anext(get_tinkoff_client)
-    securities_repository = await anext(get_securities_repository)
-    historic_candles_repository = await anext(get_historic_candle_repository)
 
-    service = Services(client, securities_repository, historic_candles_repository)
+    log.debug("Started to get data")
+    service = Services(client)
     array_data = []
+    list_shares = [x for x in supported_shares]
+
     for i in range(len(list_shares)):
         for j in range(len(list_timeframe)):
+            log.debug("Request %s data", list_shares[i])
+            await sleep(0.05)
             shares = await service.get_historic_candle(
                 ticker=list_shares[i],
-                from_date=datetime.now(timezone.utc) - time,
+                from_date=(datetime.now(timezone.utc) - time),
                 to_date=datetime.now(timezone.utc),
                 interval=list_timeframe[j],
                 integer_representation_time=True,
@@ -51,4 +61,4 @@ async def write_data(path: str, time: timedelta) -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(write_data("data_shares.json", timedelta(days=365)))
+    asyncio.run(write_data("data_shares.json", timedelta(days=90)))
