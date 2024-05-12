@@ -19,3 +19,8 @@ class UserRepository(BaseRepository):
         statement = update(User).where(User.id == user_id).values(balance=old_balance + delta).returning(User.balance)
 
         return (await self.session.execute(statement)).scalars().one()
+
+    async def is_user_exists(self, user_id: int) -> bool:
+        statement = select(User.id).where(User.id == user_id)
+        result = await self.one_or_none(statement)
+        return bool(result)
