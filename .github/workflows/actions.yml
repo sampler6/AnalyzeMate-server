@@ -1,0 +1,41 @@
+name: Actions
+on: [push]
+
+jobs:
+  Code-Quality:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.12.2"
+    - name: Configure python
+      run: pip install --upgrade pip && pip install poetry && poetry install && pip install pre-commit && pre-commit install
+
+    - name: Run pre-commit
+      run: pre-commit run --all-files
+
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-python@v2
+      with:
+        python-version: "3.12.2"
+    - uses: actions/checkout@v2
+    - name: Configure python
+      run: pip install --upgrade pip && pip install poetry && poetry install && mv ./.env-non-dev ./.env
+
+    - name: Build app
+      run: docker-compose build
+
+    - name: Run app
+      run: docker-compose up -d
+
+    - name: Wait Docker-Compose Healthy
+      uses: thegabriele97/dockercompose-health-action@v2024.04.19.0
+      with:
+        timeout: 60
+        workdir: .
+
+    - name: Run tests
+      run: poetry run pytest -rfs -vv --color yes

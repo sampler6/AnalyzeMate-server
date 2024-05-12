@@ -1,7 +1,7 @@
-from datetime import datetime, timezone
 from typing import Optional
 
 from pydantic import BaseModel, Field
+from tinkoff.invest import CandleInterval
 
 
 class HistoricCandlesSchema(BaseModel):
@@ -11,13 +11,40 @@ class HistoricCandlesSchema(BaseModel):
     lowest: float
     volume: int
     ticker: str
-    timestamp: datetime = Field(default=datetime.now(timezone.utc))
+    timeframe: CandleInterval
+    timestamp: float
+
+
+class HistoricCandlesOutSchema(BaseModel):
+    open: float
+    close: float
+    highest: float
+    lowest: float
+    volume: int
+    ticker: str
+    timeframe: int
+    timestamp: float
+
+
+class SecurityShortOutSchema(BaseModel):
+    ticker: str
+    name: str
+    price: Optional[float]
+
+
+class SecurityWithVolumeAndPriceOutSchema(BaseModel):
+    ticker: str
+    name: str
+    price: Optional[float]
+    volume: Optional[int]
+    delta_price: Optional[float]
 
 
 class SecurityOutSchema(BaseModel):
     ticker: str
     name: str
-    historic_candles: Optional[list[HistoricCandlesSchema]] = Field(default=None)
+    price: float
+    historic_candles: Optional[list[HistoricCandlesOutSchema]] = Field(default=None)
 
 
 class SecurityInSchema(BaseModel):

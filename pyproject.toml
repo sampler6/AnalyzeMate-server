@@ -2,14 +2,15 @@
 name = "src"
 version = "0.1.0"
 description = ""
-authors = ["Nikita Korzhuk <ssamplerr6@gmail.com>", "Veronika Rekalo <veronika.rekalo16@gmail.com>", ]
+authors = ["Nikita Korzhuk <ssamplerr6@gmail.com>", "Veronika Rekalo <veronika.rekalo16@gmail.com>",
+    "Lev Chekarev <levchekarev3@gmail.com>", "Saveliy Gashkov <gashkov@cs.petrsu.ru>",
+    "Williams Ukpere <ukpere@cs.petrsu.ru>"]
 license = "GPL"
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
 alembic = "^1.13.1"
-asyncpg = "^0.29.0"
 uvicorn = "^0.28.0"
 pydantic = "^2.6.4"
 fastapi = "^0.110.0"
@@ -21,6 +22,14 @@ redis = "^5.0.3"
 python-multipart = "^0.0.9"
 tinkoff-investments = "^0.2.0b96"
 matplotlib = "^3.8.3"
+pytest-asyncio = "^0.23.6"
+faker = "^24.7.1"
+pytest-depends = "^1.0.1"
+celery = "^5.3.6"
+flower = "^2.0.1"
+asyncpg = "^0.29.0"
+psycopg = {extras = ["binaries", "pool"], version = "^3.1.18"}
+pyfcm = "^1.5.4"
 
 [tool.poetry.dev-dependencies]
 mypy = "^1.9.0"
