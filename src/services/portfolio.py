@@ -63,11 +63,14 @@ class PortfolioService:
             SecurityWithVolumeAndPriceOutSchema(
                 ticker=security.ticker,
                 name=security.name,
-                price=tickers_to_volume[security.ticker][1] / tickers_to_volume[security.ticker][0],
+                price=round(tickers_to_volume[security.ticker][1] / tickers_to_volume[security.ticker][0], 2),
                 # Средняя цена одной акции
                 volume=tickers_to_volume[security.ticker][0],
-                delta_price=security.price
-                - tickers_to_volume[security.ticker][1] / tickers_to_volume[security.ticker][0],
+                delta_price=round(
+                    (security.price - tickers_to_volume[security.ticker][1] / tickers_to_volume[security.ticker][0])
+                    * tickers_to_volume[security.ticker][0],
+                    2,
+                ),
             )
             for security in await self.securities_repository.get_securities_by_tickers(tickers)
         ]
