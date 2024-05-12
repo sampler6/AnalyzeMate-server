@@ -17,6 +17,9 @@ class BaseRepository(abc.ABC, Generic[T]):
     async def one_or_none(self, statement: Select | Delete | Update | Insert) -> Optional[Any]:
         return (await self.session.execute(statement)).scalars().one_or_none()
 
+    async def one(self, statement: Select | Delete | Update | Insert) -> Any:
+        return (await self.session.execute(statement)).scalars().one()
+
     async def save(self, obj: T) -> T:
         self.session.add(obj)
         await self.session.flush()
