@@ -33,7 +33,6 @@ jobs:
       with:
         filename: 'docker-compose.yml'
         timeout: '60'
-        workdir: 'src'
 
     - name: Run tests
       run: poetry run pytest -rfs -vv --color yes
