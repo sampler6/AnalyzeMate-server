@@ -14,7 +14,7 @@ class Graphic:
     def print_graphic(stock_data: dict, indicators: Optional[dict] = None) -> None:
         """
         Отображает график ценовых данных и индикаторов.
-        :param stock_data: dict
+        :param stock_data: dict{"history": [[datetime, float]]}
             Словарь с ценовыми данными, включая историю цен и объемов. Должен содержать ключ "history".
         :param indicators: dict{"color": {"history": history, "alpha": double}}, optional
             Словарь с индикаторами для отображения на графике. Каждый элемент словаря представляет собой
@@ -28,7 +28,7 @@ class Graphic:
         close_prices = [entry[2] for entry in history]
         high_prices = [entry[3] for entry in history]
         low_prices = [entry[4] for entry in history]
-        volume = [entry[5] for entry in history]
+        # volume = [entry[5] for entry in history]
 
         # Создание графика свечей
         fig, ax1 = plt.subplots()
@@ -52,6 +52,7 @@ class Graphic:
                 plt.bar(time[i], high_prices[i] - open_prices[i], width2, bottom=open_prices[i], color="red")
                 plt.bar(time[i], low_prices[i] - close_prices[i], width2, bottom=close_prices[i], color="red")
 
+        # Отображение индикаторов
         if indicators:
             for color, indicator in indicators.items():
                 history = indicator["history"][1:]  # пропускаем строку заголовков
@@ -63,29 +64,29 @@ class Graphic:
                     timeInd, valuesInd, color=color, alpha=alpha, label=color
                 )  # Построение линии с соответствующим цветом и прозрачностью
 
-        # Отображение объема
-        ax2 = ax1.twinx()
-
-        maxClm = max(volume)
-        for i in range(len(volume)):
-            if i == 0:
-                volume[i] = volume[i] / maxClm * 10
-            else:
-                volume[i] = volume[i] / maxClm
-
-        # Определение цвета объема в зависимости от изменения цены актива
-        volume_colors = []
-        for i in range(len(volume)):
-            if close_prices[i] < open_prices[i]:
-                volume_colors.append("red")
-            elif close_prices[i] > open_prices[i]:
-                volume_colors.append("green")
-            else:
-                volume_colors.append("black")
-        ax2.bar(time, volume, width=0.8, color=volume_colors, alpha=0.5)
+        # # Отображение объема
+        # ax2 = ax1.twinx()
+        #
+        # maxClm = max(volume)
+        # for i in range(len(volume)):
+        #     if i == 0:
+        #         volume[i] = volume[i] / maxClm * 10
+        #     else:
+        #         volume[i] = volume[i] / maxClm
+        #
+        # # Определение цвета объема в зависимости от изменения цены актива
+        # volume_colors = []
+        # for i in range(len(volume)):
+        #     if close_prices[i] < open_prices[i]:
+        #         volume_colors.append("red")
+        #     elif close_prices[i] > open_prices[i]:
+        #         volume_colors.append("green")
+        #     else:
+        #         volume_colors.append("black")
+        # ax2.bar(time, volume, width=0.8, color=volume_colors, alpha=0.5)
 
         # Добавление сетки
-        ax1.grid(True)
+        # ax1.grid(True)
         # Поворот подписей оси x
         ax1.set_xticklabels(time, rotation=45, ha="right")
 

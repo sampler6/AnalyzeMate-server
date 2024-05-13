@@ -69,17 +69,16 @@ class Services:
         """
         size_interval_days = interval_dict[interval]
 
-        share = await self.get_shares("SBER")
+        share = await self.get_shares(ticker)
         dic = dict()
         dic["figi"] = share.figi
         dic["ticker"] = ticker
         dic["timeframe"] = interval.name
         m = [["time", "open", "close", "high", "low", "volume"]]
         current_date = from_date
-        # c = 0
         response = None  # noqa
 
-        while current_date + size_interval_days < to_date:
+        while current_date + size_interval_days <= to_date:
             response = await self.client.market_data.get_candles(
                 figi=share.figi, from_=current_date, to=current_date + size_interval_days, interval=interval
             )
@@ -107,6 +106,7 @@ class Services:
             #   Счётчик для отображения количества запросов к API
             #   Возможно удаление без последствий
             # c += 1
+            # print(c)
 
         response = await self.client.market_data.get_candles(
             figi=share.figi, from_=current_date, to=to_date, interval=interval
