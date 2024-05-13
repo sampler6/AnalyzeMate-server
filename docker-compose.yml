@@ -32,6 +32,7 @@ services:
   app:
     build:
       context: .
+    restart: always
     env_file:
       - .env
     container_name: AnalyzeMate_app

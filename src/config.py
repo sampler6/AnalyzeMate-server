@@ -14,7 +14,7 @@ TOKEN = os.environ.get("TOKEN")
 STOCK_MARKET = os.environ.get("STOCK_MARKET")
 REDIS_HOST = os.environ.get("REDIS_HOST")
 REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD")
-LOAD_SECURITIES = os.environ.get("LOAD_SECURITIES")
+LOAD_SECURITIES = os.environ.get("LOAD_SECURITIES") == "True"
 FCM_KEY = os.environ.get("FCM_KEY")
 
 APP_HOST = os.environ.get("APP_HOST")
