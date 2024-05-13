@@ -28,16 +28,12 @@ jobs:
     - name: Build app
       run: docker-compose build
 
-    - name: Run app
-      run: docker-compose up -d
-
-    - name: Wait for container
-      uses: stringbean/docker-healthcheck-action@v1
+    - name: Check services healthiness
+      uses: thegabriele97/dockercompose-health-action@main
       with:
-          container: analyzemate-server-app
-          wait-time: 50
-          require-status: running
-          require-healthy: true
+        filename: 'docker-compose.yml'
+        timeout: '60'
+        workdir: 'src'
 
     - name: Run tests
       run: poetry run pytest -rfs -vv --color yes
