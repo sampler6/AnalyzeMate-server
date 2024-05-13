@@ -2,14 +2,15 @@ services:
   db:
     image: postgres:16.1
     container_name: db
+    restart: always
     env_file:
       - .env
     user: postgres
     ports:
       - "5433:5432"
     volumes:
-      - analyzemate-pg:/var/lib/postgresql/data
       - ./fixtures/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - analyzemate-pg:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready" ]
       interval: 10s
@@ -20,6 +21,7 @@ services:
 
   redis:
     image: redis:latest
+    restart: always
     ports:
       - "6379:6379"
     volumes:
@@ -42,7 +44,12 @@ services:
       - db
       - redis
       - worker
-    command: bash -c "while !</dev/tcp/db/5432 || !</dev/tcp/redis/6379; do sleep 5; done; alembic upgrade head && gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:${APP_PORT}"
+    command: bash -c "while !</dev/tcp/db/5432 || !</dev/tcp/redis/6379; do sleep 1; done; sleep 2; alembic upgrade head && gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:${APP_PORT}"
+    healthcheck:
+      test: bash -c "</dev/tcp/app/${APP_PORT}"
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       Analyzemate-network:
 
@@ -56,11 +63,6 @@ services:
       - redis
     env_file:
       - .env
-    healthcheck:
-      test: bash -c "</dev/tcp/app/${APP_PORT}"
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       Analyzemate-network:
 
