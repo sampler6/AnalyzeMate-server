@@ -25,17 +25,19 @@ jobs:
     - name: Configure python
       run: pip install --upgrade pip && pip install poetry && poetry install && mv ./.env-non-dev ./.env
 
-    - name: Wait Docker-Compose Healthy
-      uses: thegabriele97/dockercompose-health-action@v2024.04.19.0
-      with:
-        timeout: 60
-        workdir: .
-
     - name: Build app
       run: docker-compose build
 
     - name: Run app
       run: docker-compose up -d
+
+    - name: Wait for container
+      uses: stringbean/docker-healthcheck-action@v1
+      with:
+          container: app
+          wait-time: 50
+          require-status: running
+          require-healthy: true
 
     - name: Run tests
       run: poetry run pytest -rfs -vv --color yes
