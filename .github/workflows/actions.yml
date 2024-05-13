@@ -34,7 +34,7 @@ jobs:
     - name: Wait for container
       uses: stringbean/docker-healthcheck-action@v1
       with:
-          container: app
+          container: analyzemate-server-app
           wait-time: 50
           require-status: running
           require-healthy: true
