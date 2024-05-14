@@ -3,6 +3,7 @@ import logging
 from logging import getLogger
 
 from api.api import router as api_router
+from config import LOAD_SECURITIES
 from exceptions.base import exception_traceback_middleware
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
@@ -37,7 +38,7 @@ app.include_router(api_router)
 async def on_startup() -> None:
     upload_data_from_files.delay()
     register_dev_accounts.delay()
-
-    while True:
-        await asyncio.sleep(300)
-        start_strategy.delay()
+    if LOAD_SECURITIES:
+        while True:
+            await asyncio.sleep(300)
+            start_strategy.delay()

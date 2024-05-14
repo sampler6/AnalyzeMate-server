@@ -16,7 +16,7 @@ class PortfolioRepository(BaseRepository):
         return await self.one_or_none(statement)
 
     async def get_portfolios_ids_by_owner_id(self, owner_id: int) -> Iterable[int]:
-        statement = select(Portfolio.id).where(Portfolio.owner == owner_id)
+        statement = select(Portfolio.id).where(Portfolio.owner == owner_id).order_by(Portfolio.id)
         return await self.all(statement)
 
     async def delete_portfolio_by_id(self, portfolio_id: int) -> None:

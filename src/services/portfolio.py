@@ -75,7 +75,7 @@ class PortfolioService:
             for security in await self.securities_repository.get_securities_by_tickers(tickers)
         ]
 
-        return securities
+        return sorted(securities, key=lambda x: x.ticker)
 
     async def get_portfolio_by_id(
         self, portfolio_id: int, user_id: int, include_securities: bool

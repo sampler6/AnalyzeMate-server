@@ -15,11 +15,11 @@ class SecuritiesRepository(BaseRepository):
         return await self.one_or_none(statement)
 
     async def get_securities_by_tickers(self, tickers: list[str]) -> Iterable[Securities]:
-        statement = select(Securities).filter(Securities.ticker.in_(tickers))
+        statement = select(Securities).where(Securities.ticker.in_(tickers)).order_by(Securities.ticker)
         return await self.all(statement)
 
     async def get_all_securities(self) -> Iterable[Securities]:
-        statement = select(Securities)
+        statement = select(Securities).order_by(Securities.ticker)
         return await self.all(statement)
 
     async def save_security(self, security: SecurityInSchema) -> None:
