@@ -10,7 +10,7 @@ token = ""
 
 logger = getLogger("test")
 # Ожидание завершение задач celery на инициализацию
-time.sleep(5)
+time.sleep(10)
 
 
 async def init() -> None:
