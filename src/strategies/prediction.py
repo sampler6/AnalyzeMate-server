@@ -118,7 +118,7 @@ class Prediction:
                     take_element = list_rsi_size[i]
                     break
 
-        if take_element == []:
+        if len(take_element) == 0:
             return None
 
         # Рассчитываем значения сделки
