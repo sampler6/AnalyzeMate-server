@@ -15,3 +15,8 @@ logger = logging.getLogger("api")
 @router.post("/subscribe/", response_model=None)
 async def subscribe_to_notifications(registration_token: str, user: UserDeps) -> None:
     await redis_db.set(str(user.id) + "_token", registration_token, ex=86400)
+
+
+@router.post("/subscribe/{ticker}/", response_model=None)
+async def subscribe_to_notifications_by_ticker(registration_token: str, user: UserDeps) -> None:
+    return None
