@@ -54,11 +54,11 @@ def start_strategy() -> None:
                 )
 
             predict = Prediction.get_RSI_predict(data)  # type: ignore
-            logger.info(predict)
-
             # отправка уведомлений
             if predict is None:
                 continue
+
+            logger.info(predict)
 
             statement = select(UserNotification).where(UserNotification.ticker == security.ticker)
             user_notifications = session.execute(statement).scalars().all()

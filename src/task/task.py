@@ -15,7 +15,7 @@ app_celery = Celery(
 
 if LOAD_SECURITIES:
     app_celery.conf.beat_schedule = {
-        "strategy": {"task": "task.task_strategy.start_strategy", "schedule": 30.0, "args": ()},
+        "strategy": {"task": "task.task_strategy.start_strategy", "schedule": 60.0, "args": ()},
     }
     upload_data_from_files.delay()
 register_dev_accounts.delay()
