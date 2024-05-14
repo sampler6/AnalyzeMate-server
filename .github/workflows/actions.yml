@@ -15,7 +15,9 @@ jobs:
     - name: Run pre-commit
       run: pre-commit run --all-files
 
-  startup:
+  Startup:
+    runs-on: ubuntu-latest
+    steps:
     - uses: actions/checkout@v2
     - name: Build app
       run: docker-compose build
@@ -23,8 +25,8 @@ jobs:
     - name: Run app
       run: docker-compose up -d
 
-  run-tests:
-    needs: [startup]
+  Run-tests:
+    needs: [Startup]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/setup-python@v2
