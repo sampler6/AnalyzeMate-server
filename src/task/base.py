@@ -14,8 +14,8 @@ engine = create_async_engine(DATABASE_URL, poolclass=NullPool)
 async_session = async_sessionmaker(engine)
 redis_sync = redis.Redis.from_url(f"redis://{REDIS_HOST}:6379")
 
-engine = create_engine(DATABASE_URL)
-sync_session = sessionmaker(engine)
+engine_sync = create_engine(DATABASE_URL)
+sync_session = sessionmaker(engine_sync)
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
