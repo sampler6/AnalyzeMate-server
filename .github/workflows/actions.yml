@@ -36,11 +36,13 @@ jobs:
     - name: Configure python
       run: pip install --upgrade pip && pip install poetry && poetry install
 
-    - name: Wait Docker-Compose Healthy
-      uses: thegabriele97/dockercompose-health-action@v2024.04.19.0
+    - name: Check the deployed service URL
+      uses: jtalk/url-health-check-action@v4
       with:
-        timeout: 60
-        workdir: .
+        url: http://localhost:8000/docs
+        follow-redirect: false
+        max-attempts: 5
+        retry-delay: 5s
 
     - name: Run tests
       run: poetry run pytest -rfs -vv --color yes
