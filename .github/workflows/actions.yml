@@ -36,5 +36,11 @@ jobs:
     - name: Configure python
       run: pip install --upgrade pip && pip install poetry && poetry install
 
+    - name: Wait Docker-Compose Healthy
+      uses: thegabriele97/dockercompose-health-action@v2024.04.19.0
+      with:
+        timeout: 60
+        workdir: .
+
     - name: Run tests
       run: poetry run pytest -rfs -vv --color yes
