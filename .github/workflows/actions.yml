@@ -29,15 +29,7 @@ jobs:
       run: docker-compose build
 
     - name: Run app
-      run: docker-compose up -d
-
-    - name: Check the deployed service URL
-      uses: jtalk/url-health-check-action@v4
-      with:
-        url: http://127.0.0.1:8000/check_startup/
-        follow-redirect: false
-        max-attempts: 5
-        retry-delay: 5s
+      run: docker-compose up -d --wait
 
     - name: Run tests
       run: poetry run pytest -rfs -vv --color yes
