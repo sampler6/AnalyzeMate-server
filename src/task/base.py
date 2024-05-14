@@ -19,20 +19,22 @@ sync_session = sessionmaker(engine)
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
-    async with async_session() as session:
-        yield session
-        await session.commit()
+    while True:
+        async with async_session() as session:
+            yield session
 
 
 async def _get_historic_candles_service_generator() -> AsyncGenerator[HistoricCandlesService, None]:
-    async with async_session() as session:
-        yield HistoricCandlesService(session)
+    while True:
+        async with async_session() as session:
+            yield HistoricCandlesService(session)
         await session.commit()
 
 
 async def _get_securities_service_generator() -> AsyncGenerator[SecuritiesService, None]:
-    async with async_session() as session:
-        yield SecuritiesService(session)
+    while True:
+        async with async_session() as session:
+            yield SecuritiesService(session)
         await session.commit()
 
 
