@@ -43,6 +43,7 @@ jobs:
         follow-redirect: false
         max-attempts: 5
         retry-delay: 5s
+        timeout: 60
 
     - name: Run tests
       run: poetry run pytest -rfs -vv --color yes
