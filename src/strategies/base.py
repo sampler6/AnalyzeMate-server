@@ -26,5 +26,3 @@ async def _get_securities_repository_generator() -> AsyncGenerator[SecuritiesRep
 
 
 get_tinkoff_client = _get_async_tinkoff_api_client_generator()
-get_historic_candle_repository = _get_historic_candle_repository_generator()
-get_securities_repository = _get_securities_repository_generator()

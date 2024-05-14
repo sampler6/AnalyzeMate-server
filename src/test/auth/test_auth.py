@@ -1,5 +1,7 @@
+from test.auth.schemas import UserRead
+from test.settings_test import check_time
+
 import pytest
-from auth.schemas.user import UserRead
 from faker import Faker
 from httpx import AsyncClient
 
@@ -7,7 +9,7 @@ from httpx import AsyncClient
 class TestAuth:
     faker: Faker = Faker()
     # генерация случайной почты
-    email = f"{faker.word()}@example.com"
+    email = f"{faker.email()}"
     # Генерация случайной пароля
     password: str = str(faker.word()).capitalize()
     password += str(faker.random.randint(0, 9))
@@ -36,6 +38,7 @@ class TestAuth:
         assert isinstance(response_data, dict)
         assert response_data["detail"][0]["msg"] == "Assertion failed, " + validation_error_text
 
+    @check_time(300)
     async def test_register(self, client_without_auth: AsyncClient) -> None:
         data = {"email": self.email, "password": self.password} | self.base_register_data
         response = await client_without_auth.post("auth/register", json=data)
@@ -45,7 +48,8 @@ class TestAuth:
         assert UserRead.model_validate(response_data)
 
     @pytest.mark.depends(on="test_register")
-    async def test_auth(self, client_without_auth: AsyncClient) -> None:
+    @check_time(900)
+    async def test_auth(self, client_without_auth: AsyncClient, client: AsyncClient) -> None:
         data = {"username": self.email, "password": self.password}
         response = await client_without_auth.post("auth/login", data=data)
         assert response.status_code == 200
@@ -60,6 +64,11 @@ class TestAuth:
         assert isinstance(response_data, dict)
         assert UserRead.model_validate(response_data)
 
+        # Удаление созданного аккаунта
+        response = await client.delete(f"users/{response_data['id']}")
+        assert response.status_code == 204
+
+    @check_time(300)
     async def test_register_with_short_password(self, client_without_auth: AsyncClient) -> None:
         # генерация пароля из меньше чем 8 символов, но с большими буквами и числом
         password = str(self.faker.word()).capitalize()
@@ -71,6 +80,7 @@ class TestAuth:
             client_without_auth, password, "Password must have 8 or greater symbols"
         )
 
+    @check_time(300)
     async def test_register_with_password_without_upper_letter(self, client_without_auth: AsyncClient) -> None:
         # генерация пароля из 8 символов с числом, но без больших букв
         password = str(self.faker.word()).lower()
@@ -80,6 +90,7 @@ class TestAuth:
 
         await self.register_with_validation_error(client_without_auth, password, "Password must have capital letter")
 
+    @check_time(300)
     async def test_register_with_password_without_numeric_symbol(self, client_without_auth: AsyncClient) -> None:
         # генерация пароля из 8 символов с большой буквой, но без числа
         password = str(self.faker.word()).capitalize()
@@ -88,6 +99,7 @@ class TestAuth:
 
         await self.register_with_validation_error(client_without_auth, password, "Password must have numeric symbol")
 
+    @check_time(300)
     async def test_auth_with_wrong_credentials(self, client_without_auth: AsyncClient) -> None:
         response = await client_without_auth.post(
             "auth/login", json={"username": f"{self.faker.word()}@example.com", "password": self.password}
@@ -95,8 +107,9 @@ class TestAuth:
         assert response.status_code == 422
 
     @pytest.mark.depends(on="test_register")
+    @check_time(300)
     async def test_auth_with_wrong_password(self, client_without_auth: AsyncClient) -> None:
         response = await client_without_auth.post(
-            "auth/login", json={"username": self.email, "password": self.password + "wrong"}
+            "auth/login", json={"username": "Admin@admin.ru", "password": self.password + "wrong"}
         )
         assert response.status_code == 422

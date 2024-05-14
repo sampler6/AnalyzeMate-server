@@ -7,7 +7,7 @@ from typing import Dict, List
 import numpy as np
 from tinkoff.invest import CandleInterval
 
-from strategies.base import get_historic_candle_repository, get_securities_repository, get_tinkoff_client
+from strategies.base import get_tinkoff_client
 
 
 class Prediction:
@@ -159,10 +159,8 @@ async def trend_predict() -> None:
 
     # В API будем через Depends получать. Тут только так(
     client = await anext(get_tinkoff_client)
-    securities_repository = await anext(get_securities_repository)
-    historic_candles_repository = await anext(get_historic_candle_repository)
 
-    service = Services(client, securities_repository, historic_candles_repository)
+    service = Services(client)
     shares = await service.get_historic_candle(
         ticker="SBER",
         from_date=datetime.now(timezone.utc) - timedelta(days=1000),
@@ -197,10 +195,8 @@ async def ema_predict() -> None:
 
     # В API будем через Depends получать. Тут только так(
     client = await anext(get_tinkoff_client)
-    securities_repository = await anext(get_securities_repository)
-    historic_candles_repository = await anext(get_historic_candle_repository)
 
-    service = Services(client, securities_repository, historic_candles_repository)
+    service = Services(client)
     shares = await service.get_historic_candle(
         ticker="SBER",
         from_date=datetime.now(timezone.utc) - timedelta(days=1000),

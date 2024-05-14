@@ -8,7 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 class Transactions(Base):
     __tablename__ = "transactions"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     volume: Mapped[int]
     price: Mapped[float]
     security: Mapped[str] = mapped_column(String, ForeignKey("securities.ticker"))
