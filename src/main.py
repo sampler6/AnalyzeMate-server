@@ -36,7 +36,8 @@ app.include_router(api_router)
 
 @app.on_event("startup")
 async def on_startup() -> None:
-    upload_data_from_files.delay()
+    if LOAD_SECURITIES:
+        upload_data_from_files.delay()
     register_dev_accounts.delay()
     if LOAD_SECURITIES:
         while True:
