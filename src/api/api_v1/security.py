@@ -33,3 +33,8 @@ async def get_securities_by_tickers(
 ) -> list[SecurityOutSchema]:
     """Получение акции по списку тикеров. Timeframe обязательно указывать при include_historic_candles=True"""
     return await service.get_securities_by_tickers(tickers, include_historic_candles, timeframe)
+
+
+@router.get("/search/{search}", response_model=list[SecurityShortOutSchema])
+async def search_security(search: str, service: SecurityServiceDeps, user: UserDeps) -> list[SecurityShortOutSchema]:
+    return await service.search_security(search)

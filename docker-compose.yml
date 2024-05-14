@@ -2,12 +2,14 @@ services:
   db:
     image: postgres:16.1
     container_name: db
+    restart: always
     env_file:
       - .env
     user: postgres
     ports:
       - "5433:5432"
     volumes:
+      - ./fixtures/init.sql:/docker-entrypoint-initdb.d/init.sql
       - analyzemate-pg:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready" ]
@@ -32,6 +34,7 @@ services:
   app:
     build:
       context: .
+    restart: always
     env_file:
       - .env
     container_name: AnalyzeMate_app
@@ -41,7 +44,12 @@ services:
       - db
       - redis
       - worker
-    command: bash -c "while !</dev/tcp/db/5432 || !</dev/tcp/redis/6379; do sleep 1; done; alembic upgrade head && gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:${APP_PORT}"
+    command: bash -c "while !</dev/tcp/db/5432 || !</dev/tcp/redis/6379; do sleep 1; done; sleep 2; alembic upgrade head && gunicorn main:app --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:${APP_PORT}"
+    healthcheck:
+      test: bash -c "</dev/tcp/app/${APP_PORT}"
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       Analyzemate-network:
 
@@ -55,11 +63,6 @@ services:
       - redis
     env_file:
       - .env
-    healthcheck:
-      test: bash -c "</dev/tcp/app/${APP_PORT}"
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       Analyzemate-network:
 

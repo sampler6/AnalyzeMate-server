@@ -15,15 +15,17 @@ jobs:
     - name: Run pre-commit
       run: pre-commit run --all-files
 
-  run-tests:
+
+  Run-tests:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/setup-python@v2
       with:
         python-version: "3.12.2"
     - uses: actions/checkout@v2
-    - name: Configure python
-      run: pip install --upgrade pip && pip install poetry && poetry install && mv ./.env-non-dev ./.env
+
+    - name: Configure env
+      run: mv ./.env-non-dev ./.env
 
     - name: Build app
       run: docker-compose build
@@ -31,11 +33,16 @@ jobs:
     - name: Run app
       run: docker-compose up -d
 
-    - name: Wait Docker-Compose Healthy
-      uses: thegabriele97/dockercompose-health-action@v2024.04.19.0
+    - name: Configure python
+      run: pip install --upgrade pip && pip install poetry && poetry install
+
+    - name: Check the deployed service URL
+      uses: jtalk/url-health-check-action@v4
       with:
-        timeout: 60
-        workdir: .
+        url: http://localhost:8000/check_startup/
+        follow-redirect: false
+        max-attempts: 5
+        retry-delay: 5s
 
     - name: Run tests
       run: poetry run pytest -rfs -vv --color yes

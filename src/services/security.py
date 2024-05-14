@@ -64,3 +64,11 @@ class SecuritiesService:
 
     async def save_securities(self, securities: list[SecurityInSchema]) -> None:
         await self.repository.save_securities(securities)
+
+    async def search_security(self, search: str) -> list[SecurityShortOutSchema]:
+        result_tickers = [ticker for ticker in await self.repository.search_security(search)]
+
+        return [
+            SecurityShortOutSchema(**x.model_dump())
+            for x in await self.get_securities_by_tickers(result_tickers, False, None)
+        ]

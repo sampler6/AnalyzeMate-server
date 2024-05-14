@@ -1,9 +1,12 @@
+from logging import getLogger
 from typing import Iterable, Optional
 
 from db.base_repository import BaseRepository
 from securities.models import Securities
 from securities.schemas import SecurityInSchema
-from sqlalchemy import select
+from sqlalchemy import func, or_, select, text
+
+logger = getLogger("api")
 
 
 class SecuritiesRepository(BaseRepository):
@@ -30,3 +33,30 @@ class SecuritiesRepository(BaseRepository):
 
         await self.save_all(securities)
         await self.session.commit()
+
+    async def search_security(self, search: str) -> list[str]:
+        """
+        Поиск по совпадению триграмм. Необходим плагин pg_trgm в postgresql.
+        Возвращает список тикеров.
+        """
+
+        # Установка мягкого лимита совпадения для поиска
+        await self.session.execute(text("SELECT set_limit(0.01);"))
+
+        statement = select(
+            Securities.ticker, func.similarity(Securities.ticker, search), func.similarity(Securities.name, search)
+        ).where(
+            or_(Securities.ticker.bool_op("%")(search), Securities.name.bool_op("%")(search)),
+        )
+
+        result = (await self.session.execute(statement)).all()
+
+        # Считаем значение максимального совпадения и делим пополам. Акции, которые ниже этого числа, не выдаем
+        tickers = []
+        medium = max([max(x[1], x[2]) for x in result])
+
+        for ticker in sorted(result, key=lambda x: max(x[1], x[2]), reverse=True):
+            if max(ticker[1], ticker[2]) >= 0.5 * medium:
+                tickers.append(ticker[0])
+
+        return tickers
