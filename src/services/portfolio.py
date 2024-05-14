@@ -112,6 +112,7 @@ class PortfolioService:
         if len(await self.__get_portfolio_securities(portfolio_id)) > 0:
             raise ValidationException("Portfolio is not emtpy")
 
+        await self.transaction_repository.delete_transactions_by_portfolio_id(portfolio_id)
         await self.repository.delete_portfolio_by_id(portfolio_id)
         await self.user_repository.add_delta_to_user_balance(user_id, -1 * portfolio.balance)
 
