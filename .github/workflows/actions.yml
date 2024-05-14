@@ -17,7 +17,6 @@ jobs:
 
 
   Run-tests:
-    needs: [Startup]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/setup-python@v2
