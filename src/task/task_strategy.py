@@ -71,7 +71,7 @@ def start_strategy() -> None:
                 ):
                     continue
 
-                user_ids.append(str(user.user_id))
+                user_ids.append(user.user_id)
 
             send_notification.delay(
                 user_ids,
