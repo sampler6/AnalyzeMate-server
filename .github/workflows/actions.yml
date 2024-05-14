@@ -15,21 +15,28 @@ jobs:
     - name: Run pre-commit
       run: pre-commit run --all-files
 
+  startup:
+    - uses: actions/checkout@v2
+    - name: Build app
+      run: docker-compose build
+
+    - name: Run app
+      run: docker-compose up -d
+
   run-tests:
+    needs: [startup]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/setup-python@v2
       with:
         python-version: "3.12.2"
     - uses: actions/checkout@v2
+
+    - name: Wait for service startup
+      run: bash -c "sleep(10)"
+
     - name: Configure python
       run: pip install --upgrade pip && pip install poetry && poetry install && mv ./.env-non-dev ./.env
-
-    - name: Build app
-      run: docker-compose build
-
-    - name: Run app
-      run: docker-compose up -d --wait
 
     - name: Run tests
       run: poetry run pytest -rfs -vv --color yes
