@@ -14,8 +14,6 @@ UserDeps = Annotated[User, Depends(current_active_user)]
 router = APIRouter()
 logger = logging.getLogger("api")
 
-# TODO: Удалить. Встроить в авторизацию посылку токена в авторизацию. "Подписка через покупку" акции
-
 
 @router.post("/subscribe/", response_model=None)
 async def subscribe_to_notifications(registration_token: str, user: UserDeps) -> None:

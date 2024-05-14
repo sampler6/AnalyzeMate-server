@@ -4,6 +4,11 @@ from enum import StrEnum
 from pydantic import BaseModel, Field
 
 
+class TransactionType(StrEnum):
+    Buy = "Buy"
+    Sell = "Sell"
+
+
 class TransactionCreateSchema(BaseModel):
     volume: int
     price: float
@@ -23,9 +28,5 @@ class TransactionOutSchema(BaseModel):
     price: float
     security: str
     portfolio: int
+    type: TransactionType
     timestamp: datetime = Field(default=datetime.now(timezone.utc))
-
-
-class TransactionType(StrEnum):
-    Buy = "Buy"
-    Sell = "Sell"

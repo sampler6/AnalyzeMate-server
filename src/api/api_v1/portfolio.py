@@ -69,3 +69,10 @@ async def make_transaction(
     transaction: TransactionInSchema, transaction_type: TransactionType, service: TransactionServiceDeps, user: UserDeps
 ) -> TransactionOutSchema:
     return await service.make_transaction(transaction, transaction_type, user.id)
+
+
+@router.get("/transaction/{portfolio_id}/", response_model=list[TransactionOutSchema])
+async def get_transactions(
+    portfolio_id: int, service: TransactionServiceDeps, user: UserDeps
+) -> list[TransactionOutSchema]:
+    return await service.get_transactions_by_portfolio_id(portfolio_id, user.id)

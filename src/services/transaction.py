@@ -83,4 +83,28 @@ class TransactionsService:
         await self.user_repository.add_delta_to_user_balance(user_id=portfolio.owner, delta=delta)
         # TODO: Подпись на канал акции, если акции раньше не было
 
-        return TransactionOutSchema(**transaction_create.model_dump())
+        if transaction_create.volume < 0:
+            transaction_create.volume *= -1
+
+        return TransactionOutSchema(**transaction_create.model_dump() | {"type": transaction_type})
+
+    async def get_transactions_by_portfolio_id(self, portfolio_id: int, user_id: int) -> list[TransactionOutSchema]:
+        portfolio = await self.portfolio_repository.get_portfolio_by_id(portfolio_id)
+        if not portfolio:
+            raise PortfolioNotFoundError(id=portfolio_id)
+        if portfolio.owner != user_id:
+            raise AccessDeniedException("You're not the owner of portfolio")
+
+        transactions = await self.repository.get_transactions_by_portfolio_id(portfolio_id)
+
+        return [
+            TransactionOutSchema(
+                type=TransactionType.Buy if transaction.volume > 0 else TransactionType.Sell,
+                volume=transaction.volume if transaction.volume > 0 else transaction.volume * -1,
+                price=transaction.price,
+                security=transaction.security,
+                portfolio=transaction.portfolio,
+                timestamp=transaction.timestamp,
+            )
+            for transaction in transactions
+        ]
