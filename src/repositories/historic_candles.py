@@ -4,7 +4,7 @@ from typing import Iterable
 from db.base_repository import BaseRepository
 from securities.models import HistoricCandles
 from securities.schemas import HistoricCandlesSchema
-from sqlalchemy import and_, desc, insert, select
+from sqlalchemy import and_, insert, select
 
 logger = logging.getLogger("api")
 
@@ -13,10 +13,8 @@ class HistoricCandlesRepository(BaseRepository):
     async def get_historic_candles_by_ticker_and_timeframe(
         self, ticker: str, timeframe: int
     ) -> Iterable[HistoricCandles]:
-        statement = (
-            select(HistoricCandles)
-            .where(and_(HistoricCandles.ticker == ticker, HistoricCandles.timeframe == timeframe))
-            .order_by(desc(HistoricCandles.timestamp))
+        statement = select(HistoricCandles).where(
+            and_(HistoricCandles.ticker == ticker, HistoricCandles.timeframe == timeframe)
         )
         return await self.all(statement)
 
