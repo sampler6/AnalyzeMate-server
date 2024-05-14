@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from logging import getLogger
 
@@ -7,7 +6,7 @@ from config import LOAD_SECURITIES
 from exceptions.base import exception_traceback_middleware
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-from task import register_dev_accounts, start_strategy, upload_data_from_files
+from task import register_dev_accounts, upload_data_from_files
 
 origins = [
     "*",
@@ -39,7 +38,3 @@ async def on_startup() -> None:
     if LOAD_SECURITIES:
         upload_data_from_files.delay()
     register_dev_accounts.delay()
-    if LOAD_SECURITIES:
-        while True:
-            await asyncio.sleep(300)
-            start_strategy.delay()

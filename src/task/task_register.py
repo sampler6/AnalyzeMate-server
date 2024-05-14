@@ -1,4 +1,5 @@
 import asyncio
+import time
 from logging import getLogger
 
 from auth import User
@@ -15,6 +16,7 @@ logger = getLogger("api")
 
 @app_celery.task(default_retry_delay=2 * 5, max_retries=2)
 def register_dev_accounts() -> None:
+    time.sleep(5)
     data = {
         "birthdate": "2024-04-06T16:09:20.161173Z",
         "patronymic": "test",
