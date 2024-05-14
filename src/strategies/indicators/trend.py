@@ -13,15 +13,16 @@ class Trend:
         """
         Вычисляет тренд на основе временного ряда цен.
 
-        :param history: List[List[float]]
+        :param history: List[[datetime, float]]
             Исторические данные о ценах. Каждый внутренний список содержит два элемента: временную метку и значение цены
-        :return: List[List[float]]
+        :return: List[[datetime, float]]
             Список временных меток и значения тренда.
         """
         time = [entry[0] for entry in history]  # временные метки
         prices = [(entry[1] + entry[2]) / 2 for entry in history]  # значения цен
         trends = []
 
+        # Проводим линейную регрессию на маленьких участках
         for i in range(0, len(prices), size_trend_window):
             # Индексы для текущего окна
             indices = list(range(i, min(i + size_trend_window, len(prices))))
@@ -42,9 +43,12 @@ class Trend:
                     [time[indices[0]], prices[indices[0]], "Row", 1, slope, intercept]
                 )  # Сохранение коэффициента наклона
 
+        # Пока происходят изменения
         flag_check_order = True
         while flag_check_order:
             flag_check_order = False
+
+            # Если два смежных участка имеют одинаковый тренд, то объединяем их
             i = 1
             while i < len(trends):
                 if trends[i - 1][2] == trends[i][2]:
@@ -54,6 +58,8 @@ class Trend:
                     continue
                 i += 1
 
+            # Если из трех участков первый и последний имеют одинаковый тренд и в сумме значительно больше по длинне,
+            # чем центральный участок, то объединяем все 3 участка
             i = 1
             while i < len(trends) - 2:
                 if trends[i - 1][2] == trends[i + 1][2] and (
@@ -77,9 +83,9 @@ class Trend:
     def get_trend(data: Dict) -> Dict:
         """
         Вычисляет тренд на основе временного ряда цен.
-        :param data: dict
+        :param data: dict{"history": [[datetime, float]]}
             Словарь с данными о бумаге.
-        :return: list
+        :return: dict{"history": [[datetime, float]]}
             Словарь с данными о бумаге и тренде.
         """
         trend = [["time", "value"]]
@@ -94,7 +100,7 @@ class Trend:
         """
         Вычисляет тренд на основе временного ряда цен и сохраняет его в JSON файл.
 
-        :param data: dict
+        :param data: dict{"history": [[datetime, float]]}
             Словарь с данными о бумаге.
         :param path: str
             Путь к файлу JSON, в который будет сохранен тренд.
@@ -119,7 +125,7 @@ async def main() -> None:
 
     service = Services(client)
     shares = await service.get_historic_candle(
-        ticker="SBER",
+        ticker="ABIO",
         from_date=datetime.now(timezone.utc) - timedelta(days=1000),
         to_date=datetime.now(timezone.utc),
         interval=CandleInterval.CANDLE_INTERVAL_DAY,

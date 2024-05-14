@@ -9,15 +9,16 @@ class EMA:
         """
         Вычисляет экспоненциальное скользящее среднее (EMA) на основе исторических данных.
 
-        :param history: list
+        :param history: list[[datetime, float]]
             Исторические данные о ценах. Каждый внутренний список содержит два элемента: временную метку и значение цены
         :param window: int
             Размер окна для вычисления EMA.
-        :return: list
+        :return: list[[datetime, float]]
             Список временных меток и значения EMA.
         """
         time = [entry[0] for entry in history]
-        prices = [entry[2] for entry in history]
+        prices = [entry[2] if len(history[0]) > 2 else entry[1] for entry in history]
+
         ema_values = []
 
         # Вычисляем начальное значение EMA как простое скользящее среднее для первых window точек
@@ -36,11 +37,11 @@ class EMA:
         """
         Вычисляет экспоненциальное скользящее среднее (EMA) на основе временного ряда цен.
 
-        :param data: dict
+        :param data: dict{"history": [[datetime, float]]}
             Словарь с данными о бумаге.
         :param window: int
             Размер окна для вычисления EMA.
-        :return: dict
+        :return: dict{"history": [[datetime, float]]}
             Словарь с данными о бумаге и EMA.
         """
         ema = [["time", "value"]]
@@ -56,7 +57,7 @@ class EMA:
         Вычисляет экспоненциальное скользящее среднее (EMA) на основе временного ряда цен
         и сохраняет его в JSON файл.
 
-        :param data: dict
+        :param data: dict{"history": [[datetime, float]]}
             Словарь с данными о бумаге.
         :param window: int
             Размер окна для вычисления EMA.
@@ -79,6 +80,7 @@ async def main() -> None:
     from strategies.base import get_tinkoff_client
     from strategies.servises import Services
 
+    # В API будем через Depends получать. Тут только так(
     client = await anext(get_tinkoff_client)
 
     service = Services(client)

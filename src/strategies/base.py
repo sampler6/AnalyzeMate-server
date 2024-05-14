@@ -9,10 +9,11 @@ from tinkoff.invest.async_services import AsyncServices
 
 
 async def _get_async_tinkoff_api_client_generator() -> AsyncGenerator[AsyncServices, None]:
-    if TOKEN is None:
-        raise Exception("invalid tinkoff token")
-    async with AsyncClient(TOKEN) as client:
-        yield client
+    while True:
+        if TOKEN is None:
+            raise Exception("invalid tinkoff token")
+        async with AsyncClient(TOKEN) as client:
+            yield client
 
 
 async def _get_historic_candle_repository_generator() -> AsyncGenerator[HistoricCandlesRepository, None]:

@@ -14,7 +14,13 @@ size_trend_window = 10
 share_wave = 1 / 10
 
 # Доля трендового окна для выставления заявок
-interval_order_in_trend = 3 / 4
+interval_order_in_trend = 5 / 8
 
 # Значение EMA
 window_EMA = 20
+
+# Значение RSI для продажи
+upper_value_EMA = 65
+
+# Значение RSI для покупки
+lower_value_EMA = 50

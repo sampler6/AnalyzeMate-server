@@ -11,11 +11,11 @@ class RSI:
         """
         Вычисляет индекс относительной силы (RSI) для временного ряда цен.
 
-        :param history: List
+        :param history: List[[datetime, float]]
             Исторические данные о ценах. Каждый внутренний список содержит два элемента: временную метку и значение цены
         :param window: int
             Размер окна для вычисления RSI (по умолчанию 14).
-        :return: List
+        :return: List[[datetime, float]]
             Список временных меток и значения RSI.
         """
         time = [entry[0] for entry in history]
@@ -48,11 +48,11 @@ class RSI:
         """
         Вычисляет индекс относительной силы (RSI) для временного ряда цен.
 
-        :param data: Dict
+        :param data: dict{"history": [[datetime, float]]}
              Словарь с данными о бумаге.
         :param window: int
             Размер окна для вычисления RSI (по умолчанию 14).
-        :return: Dict
+        :return: dict{"history": [[datetime, float]]}
             Словарь с данными о бумаге и RSI.
         """
         rsi_data = [["time", "value"]]
@@ -67,7 +67,7 @@ class RSI:
         """
         Вычисляет индекс относительной силы (RSI) для временного ряда цен и сохраняет его в JSON файл.
 
-        :param data: Dict
+        :param data: dict{"history": [[datetime, float]]}
              Словарь с данными о бумаге.
         :param window: int
             Размер окна для вычисления RSI (по умолчанию 14).
@@ -90,6 +90,7 @@ async def main() -> None:
     from strategies.base import get_tinkoff_client
     from strategies.servises import Services
 
+    # В API будем через Depends получать. Тут только так(
     client = await anext(get_tinkoff_client)
 
     service = Services(client)
