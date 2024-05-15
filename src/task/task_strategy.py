@@ -75,8 +75,10 @@ def start_strategy() -> None:
 
             send_notification.delay(
                 user_ids,
-                f"Уведомление по акции {security.ticker}\n",
-                f"Вход: {predict["open"]}\n" f"Стоп: {predict["close"]}\n" f"Тейк: {predict["take profit"]}",
+                f"Уведомление по акции {security.ticker}",
+                f"Вход: {round(predict["open"], 2)}\n"
+                f"Стоп: {round(predict["close"], 2)}\n"
+                f"Тейк: {round(predict["take profit"], 2)}",
             )
             statement = (
                 update(UserNotification)
