@@ -120,7 +120,7 @@ async def process_new_data(
                     Securities(
                         ticker=security["ticker"],
                         name=supported_shares[security["ticker"]],
-                        price=security["history"][len(security["history"]) - 1][2],
+                        price=round(security["history"][len(security["history"]) - 1][2], 2),
                     )
                 )
                 existing_tickers_in_db.append(security["ticker"])
@@ -129,7 +129,7 @@ async def process_new_data(
                 stmt = (
                     update(Securities)
                     .where(Securities.ticker == security["ticker"])
-                    .values(price=security["history"][len(security["history"]) - 1][2])
+                    .values(price=round(security["history"][len(security["history"]) - 1][2], 2))
                 )
                 with sync_session() as session:
                     session.execute(stmt)
