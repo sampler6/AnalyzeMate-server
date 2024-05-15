@@ -15,5 +15,5 @@ def send_notification(user_ids: list[int], title: str, body: str) -> None:
         if result := redis_sync.get(str(user) + "_token"):
             registrations_tokens.append(result.decode())
 
-    logger.info("%s %s %s", registrations_tokens, title, body)
+    logger.info("%s %s %s", registrations_tokens, title)
     manager.send_notifications(registrations_tokens, title, body)
