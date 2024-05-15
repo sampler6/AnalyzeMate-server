@@ -4,6 +4,7 @@ from datetime import datetime
 from logging import getLogger
 
 from celery import shared_task
+from config import LOAD_SECURITIES
 from securities.models.security import Securities
 from services.historic_candle import HistoricCandlesService
 from services.security import SecuritiesService
@@ -20,8 +21,12 @@ def upload_data_from_files(**kwargs) -> None:  # type:ignore
     """Инициализация свечей из файла data_shares.json в базу данных"""
     logger.info("Начата процедура записи предзагруженных акций в базу данных")
 
-    with open("strategies/data_shares.json") as f:
-        data = json.load(f)["data"]
+    if LOAD_SECURITIES:
+        with open("strategies/data_shares.json") as f:
+            data = json.load(f)["data"]
+    else:
+        with open("strategies/data_shares_for_tests.json") as f:
+            data = json.load(f)["data"]
 
     security_service: SecuritiesService = asyncio.run(anext(get_strategies_securities_service))  # type:ignore
     historic_candle_service: HistoricCandlesService = asyncio.run(anext(get_strategies_historic_candles_service))  # type:ignore
