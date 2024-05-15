@@ -4,7 +4,7 @@ from datetime import datetime
 from logging import getLogger
 
 from celery import shared_task
-from securities.models import Securities
+from securities.models.security import Securities
 from services.historic_candle import HistoricCandlesService
 from services.security import SecuritiesService
 from strategies.supported_shares import supported_shares
@@ -59,7 +59,7 @@ def get_existing_securities_and_historic_candles_from_db(
 
 
 def process_new_data(
-    data: dict, existing_tickers_in_db: list[str], existing_candles_in_db: dict[tuple[str, int], set[float]]
+    data: list[dict], existing_tickers_in_db: list[str], existing_candles_in_db: dict[tuple[str, int], set[float]]
 ) -> tuple[list[dict], list[Securities]]:
     st = datetime.now()
 
