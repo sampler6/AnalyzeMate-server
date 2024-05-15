@@ -1,5 +1,6 @@
 import time
 from logging import getLogger
+from test.auth.schemas import UserRead
 
 import pytest_asyncio
 from config import APP_HOST, APP_PORT
@@ -32,6 +33,13 @@ async def client() -> AsyncClient:
         base_url=f"http://{APP_HOST}:{APP_PORT}/", headers={"Authorization": f"Bearer {token}"}
     ) as client:
         yield client
+
+
+async def get_current_user(client: AsyncClient) -> UserRead:
+    response = await client.get("users/me")
+    assert response.status_code == 200
+    user = UserRead.model_validate(response.json())
+    return user
 
 
 @pytest_asyncio.fixture()
