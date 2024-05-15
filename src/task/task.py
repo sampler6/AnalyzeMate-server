@@ -22,7 +22,7 @@ if LOAD_SECURITIES:
     upload_data_from_files.delay()
     app_celery.conf.beat_schedule = {
         "strategy": {"task": "task.task_strategy.start_strategy", "schedule": 60.0, "args": ()},
-        "get_new_canldes": {"task": "task.task_get_new_candles.get_new_candles", "schedule": 900.0, "args": ()},
+        "get_new_candles": {"task": "task.task_get_new_candles.get_new_candles", "schedule": 900.0, "args": ()},
     }
 register_dev_accounts.delay()
 
