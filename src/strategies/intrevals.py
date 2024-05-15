@@ -16,3 +16,10 @@ interval_dict = {
     CandleInterval.CANDLE_INTERVAL_WEEK: timedelta(days=732),
     CandleInterval.CANDLE_INTERVAL_MONTH: timedelta(days=3660),
 }
+
+interval_to_timedelta = {
+    CandleInterval.CANDLE_INTERVAL_30_MIN: timedelta(minutes=30),
+    CandleInterval.CANDLE_INTERVAL_HOUR: timedelta(hours=1),
+    CandleInterval.CANDLE_INTERVAL_4_HOUR: timedelta(hours=4),
+    CandleInterval.CANDLE_INTERVAL_DAY: timedelta(days=1),
+}
